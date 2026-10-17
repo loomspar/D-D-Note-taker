@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Session Scribe</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎲</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a href="#/" class="brand">🎲 Session Scribe</a>
+  </header>
+
+  <main id="app">
+    <!-- Home -->
+    <section id="view-home" class="view">
+      <div class="hero">
+        <h1>Record your session.<br>Get the notes.</h1>
+        <p class="lead">Put your device in the middle of the table and press record. When you're done, Session Scribe writes up everything that happened.</p>
+        <input id="new-title" class="title-input" placeholder="Session name (optional)" maxlength="120">
+        <button id="btn-record" class="btn btn-record">
+          <span class="rec-dot"></span> Start Recording
+        </button>
+        <div class="upload-row">
+          or <label class="link-btn">upload a recording<input id="file-input" type="file" accept="audio/*,video/*" hidden></label>
+        </div>
+        <div id="upload-progress" class="upload-progress" hidden>
+          <div class="bar"><div id="upload-bar"></div></div>
+          <span id="upload-label">Uploading…</span>
+        </div>
+      </div>
+
+      <details class="card campaign">
+        <summary>Campaign info <span class="muted">(optional, but helps a lot)</span></summary>
+        <p class="muted small">List player characters, important NPCs, places, and anything else worth knowing. This helps get fantasy names spelled right.</p>
+        <textarea id="campaign" rows="6" placeholder="Campaign: Curse of Strahd&#10;Players: Sam plays Thorin (dwarf cleric), Alex plays Lyra Moonwhisper (elf rogue)&#10;NPCs: Ireena Kolyana, Ismark, Madam Eva&#10;Places: Barovia, Vallaki, Castle Ravenloft"></textarea>
+        <div class="row-end"><span id="campaign-saved" class="muted small"></span><button id="btn-save-campaign" class="btn btn-small">Save</button></div>
+      </details>
+
+      <h2 class="section-title">Past sessions</h2>
+      <div id="session-list" class="session-list"></div>
+    </section>
+
+    <!-- Recording -->
+    <section id="view-record" class="view" hidden>
+      <div class="recorder card">
+        <div id="rec-status" class="rec-status"><span class="rec-dot live"></span> Recording</div>
+        <div id="timer" class="timer">0:00:00</div>
+        <canvas id="meter" class="meter" width="600" height="60"></canvas>
+        <p id="rec-sub" class="muted small">Audio is saved every few minutes, so nothing is lost if something goes wrong.</p>
+        <div class="rec-buttons">
+          <button id="btn-pause" class="btn btn-secondary">Pause</button>
+          <button id="btn-stop" class="btn btn-primary">End Session &amp; Write Notes</button>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Live transcript <span id="live-count" class="muted small"></span></h3>
+        <pre id="live-transcript" class="live-transcript muted">Transcript will appear here a few minutes in…</pre>
+      </div>
+    </section>
+
+    <!-- Session / notes -->
+    <section id="view-session" class="view" hidden>
+      <div class="session-head">
+        <h1 id="session-title" class="session-title" title="Click to rename"></h1>
+        <div id="session-date" class="muted small"></div>
+      </div>
+
+      <div id="progress-card" class="card progress-card" hidden>
+        <div class="spinner"></div>
+        <div>
+          <div id="progress-title" class="progress-title"></div>
+          <div id="progress-detail" class="muted small"></div>
+        </div>
+      </div>
+
+      <div id="error-card" class="card error-card" hidden>
+        <strong>Something went wrong.</strong>
+        <p id="error-text"></p>
+        <button id="btn-retry" class="btn btn-small">Try again</button>
+      </div>
+
+      <div class="tabs" id="tabs" hidden>
+        <button class="tab active" data-tab="notes">Notes</button>
+        <button class="tab" data-tab="transcript">Transcript</button>
+        <div class="tab-actions">
+          <button id="btn-copy" class="btn btn-small btn-secondary">Copy</button>
+          <button id="btn-download" class="btn btn-small btn-secondary">Download</button>
+          <button id="btn-print" class="btn btn-small btn-secondary">Print</button>
+          <button id="btn-regen" class="btn btn-small btn-secondary">Rewrite</button>
+          <button id="btn-delete" class="btn btn-small btn-danger">Delete</button>
+        </div>
+      </div>
+      <article id="notes" class="notes parchment" hidden></article>
+      <pre id="transcript" class="transcript card" hidden></pre>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
