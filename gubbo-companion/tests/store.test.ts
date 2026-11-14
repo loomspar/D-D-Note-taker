@@ -144,7 +144,9 @@ describe('settings, secrets and small validators', () => {
     const dbFile = path.join(dir, 'gubbo.db'); const db = openDb(dbFile); new Store(db).createVideo({ title: 'T' });
     const backup = path.join(dir, 'b.gubbo-backup'); db.prepare('VACUUM INTO ?').run(backup); db.close();
     expect(fs.readFileSync(backup).includes('SECRETVALUE')).toBe(false);
-    expect(new Store(openDb(backup)).listVideos()).toHaveLength(1);     // a backup restores project data
+    const restored = openDb(backup);
+    expect(new Store(restored).listVideos()).toHaveLength(1);           // a backup restores project data
+    restored.close();
     sec.clear('anthropicKey'); expect(sec.has('anthropicKey')).toBe(false);
     fs.rmSync(dir, { recursive: true, force: true });
   });

@@ -23,6 +23,8 @@ import { YouTubeService } from './youtube/service';
 
 if (process.env.GUBBO_USER_DATA) app.setPath('userData', process.env.GUBBO_USER_DATA);
 const SMOKE = !!process.env.GUBBO_SMOKE;
+// The key is only ever sent to Anthropic. A different endpoint is honoured solely in unpackaged development runs.
+const API_BASE = !app.isPackaged && process.env.GUBBO_DEV_API_BASE ? process.env.GUBBO_DEV_API_BASE : 'https://api.anthropic.com';
 
 if (!app.requestSingleInstanceLock()) {
   app.quit();
@@ -70,7 +72,9 @@ async function init(): Promise<void> {
   applyPendingRestore();
   db = openDb(dbFile);
   store = new Store(db);
-  secrets = new Secrets(path.join(dataDir, 'secrets.json'), safeStorage);
+  // Development on a machine without OS credential protection only: never active in the packaged app.
+  const devPlain = !app.isPackaged && process.env.GUBBO_DEV_INSECURE_SECRETS === '1';
+  secrets = new Secrets(path.join(dataDir, 'secrets.json'), devPlain ? { isEncryptionAvailable: () => true, encryptString: (v) => Buffer.from(v), decryptString: (b) => b.toString() } : safeStorage);
   settings = loadSettings(db);
   budget = new Budget(db, () => secrets.has('anthropicKey'));
   whisper = new Whisper(path.join(dataDir, 'whisper'), () => settings.voice.whisperModel);
@@ -83,7 +87,7 @@ async function init(): Promise<void> {
   engine = new ChatEngine({
     db, store, budget,
     settings: () => settings,
-    client: () => { const key = secrets.get('anthropicKey'); return key ? new Anthropic({ apiKey: key, maxRetries: 0 }) : null; },
+    client: () => { const key = secrets.get('anthropicKey'); return key ? new Anthropic({ apiKey: key, baseURL: API_BASE, maxRetries: 0 }) : null; },
     tools: {
       store, settings: () => settings,
       channelReport: () => { const s = yt.status(); return { report: s.channelConfirmed ? s.report : null, stale: s.stale, connected: s.connected }; },
@@ -150,7 +154,8 @@ function createPanel(): void {
     backgroundColor: '#1b1a20', icon: asset('icon.png'), autoHideMenuBar: true, webPreferences: webPreferences(),
   });
   void panel.loadFile(page('panel.html'));
-  panel.once('ready-to-show', () => { if (!settings.setupDone || !app.getLoginItemSettings().wasOpenedAtLogin) panel?.show(); });
+  // Started by Windows at sign-in (--hidden): stay in the tray with just the character showing.
+  panel.once('ready-to-show', () => { if (!settings.setupDone || !process.argv.includes('--hidden')) panel?.show(); });
   panel.on('close', (e) => { if (!quitting) { e.preventDefault(); panel?.hide(); } });
 }
 
@@ -342,7 +347,7 @@ function registerIpc(): void {
     if (patch === null || typeof patch !== 'object' || 'hotkey' in patch) throw new Error('Invalid settings.');
     settings = saveSettings(db, patch);
     if ('avatar' in patch) applyAvatarSettings();
-    if ('launchAtLogin' in patch) app.setLoginItemSettings({ openAtLogin: settings.launchAtLogin });
+    if ('launchAtLogin' in patch) app.setLoginItemSettings({ openAtLogin: settings.launchAtLogin, args: ['--hidden'] });
     changed();
     return settings;
   });
@@ -402,7 +407,7 @@ function registerIpc(): void {
     if (!/^sk-ant-[A-Za-z0-9_-]{20,}$/.test(k)) throw new Error('That does not look like an Anthropic API key (it should start with “sk-ant-”).');
     if (k.startsWith('sk-ant-admin')) throw new Error('That is an Admin key. Create a normal API key in a workspace for this app instead.');
     // Listing models is free and proves the key works before it is stored.
-    try { await new Anthropic({ apiKey: k, maxRetries: 0 }).models.list({ limit: 1 }, { timeout: 15_000 }); }
+    try { await new Anthropic({ apiKey: k, baseURL: API_BASE, maxRetries: 0 }).models.list({ limit: 1 }, { timeout: 15_000 }); }
     catch (e) {
       if (e instanceof Anthropic.AuthenticationError) throw new Error('Anthropic rejected that key. Check that it was copied completely.');
       if (!(e instanceof Anthropic.APIConnectionError)) throw new Error(`The key could not be checked (${(e as Error).message.slice(0, 120)}).`);
