@@ -96,6 +96,7 @@ async function init(): Promise<void> {
     emit: (ev) => onChatEvent(ev),
   });
   if (!settings.history.saveTranscripts) engine.clearAllHistory();
+  if (process.env.GUBBO_SMOKE === 'voice') settings = saveSettings(db, { setupDone: true, voice: { whisperModel: 'tiny.en', speakReplies: false } });
 
   lockDownSession();
   registerIpc();
@@ -263,8 +264,10 @@ function toggleTalk(): void {
   send(panel, 'voice:toggle');
 }
 
+const stateLog: string[] = [];
 function setAvatarState(state: AvatarState): void {
   avatarState = state;
+  if (SMOKE) stateLog.push(state);
   send(avatar, 'avatar:state', state);
   // Escape is intercepted globally only while something is actually in progress.
   const active = state === 'listening' || state === 'transcribing' || state === 'thinking' || state === 'speaking';
@@ -638,10 +641,38 @@ function runSmoke(): void {
       report.budgetState = budget.status().state;
       report.dataDir = app.getPath('userData');
       report.whisper = whisper.status();
+      if (process.env.GUBBO_SMOKE === 'voice') { clearTimeout(timer); await voiceSmoke(report); finish(report.voiceOk === true); return; }
       clearTimeout(timer);
       finish(report.panelRendered === true && report.avatarCanvas === true && report.budgetState === 'no_key');
     } catch (e) { report.error = String(e); clearTimeout(timer); finish(false); }
   };
   panel!.webContents.once('did-finish-load', () => setTimeout(check, 1500));
   avatar!.webContents.once('did-finish-load', () => setTimeout(check, 1500));
+}
+
+/**
+ * `GUBBO_SMOKE=voice` with Chromium's fake audio-capture device playing a WAV file: exercises the real
+ * hotkey handler → microphone capture → 16 kHz WAV → whisper.cpp → chat path. With no API key stored the
+ * turn is blocked before dispatch and the transcript lands back in the composer, where it is read.
+ */
+async function voiceSmoke(report: Record<string, unknown>): Promise<void> {
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+  const until = async (fn: () => boolean | Promise<boolean>, ms: number) => { const end = Date.now() + ms; while (Date.now() < end) { if (await fn()) return true; await sleep(250); } return false; };
+  const draft = () => panel!.webContents.executeJavaScript('document.querySelector(".composer textarea")?.value ?? ""') as Promise<string>;
+  try {
+    await whisper.download(() => {});
+    report.micActiveBeforeTalk = avatarState;
+    toggleTalk();                                                       // what the global hotkey calls
+    report.reachedListening = await until(() => avatarState === 'listening', 15_000);
+    report.escapeBoundWhileListening = globalShortcut.isRegistered('Escape');
+    await sleep(Number(process.env.GUBBO_SMOKE_RECORD_MS ?? 6000));
+    toggleTalk();
+    report.gotTranscript = await until(async () => (await draft()).length > 0, 90_000);
+    report.transcript = await draft();
+    await until(() => avatarState === 'idle', 8000);
+    report.stateSequence = stateLog.join(' > ');
+    report.escapeReleasedWhenIdle = !globalShortcut.isRegistered('Escape');
+    report.requestsRecorded = budget.ledger().length;                   // must be 0: nothing was dispatched without a key
+    report.voiceOk = report.reachedListening === true && report.gotTranscript === true && report.requestsRecorded === 0;
+  } catch (e) { report.voiceError = String(e); report.voiceOk = false; }
 }

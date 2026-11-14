@@ -46,7 +46,7 @@ jobs:
           "Shortcut OK -> $target"
           node scripts/smoke.mjs "$target"
       - name: Voice pipeline (Windows voice -> whisper.cpp)
-        run: node scripts/verify-voice.mjs
+        run: node scripts/verify-voice.mjs "release/win-unpacked/Gubbo Companion.exe"
       - uses: actions/upload-artifact@v4
         with:
           name: Gubbo-Companion-Setup
