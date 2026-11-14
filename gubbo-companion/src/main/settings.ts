@@ -35,6 +35,7 @@ export const DEFAULT_SETTINGS: Settings = {
   youtube: { launchBriefing: true, channelConfirmedId: null },
   gubbo: { mode: 'unset', folder: null, lastFolderScan: null },
   companion: { minimal: true, captions: true },
+  remote: { enabled: false },
   rules: SEED_RULES,
 };
 

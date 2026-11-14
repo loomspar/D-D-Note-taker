@@ -389,6 +389,42 @@ export function GubboSection() {
   );
 }
 
+// ------------------------------------------------------------------ iPhone link
+
+interface RemoteData { enabled: boolean; running: boolean; available: boolean; url: string | null; qr: string | null; error: string | null }
+
+export function PhoneSection() {
+  const { toast } = useApp();
+  const [d, setD] = useState<RemoteData | null>(null);
+  useEffect(() => { void call<RemoteData>('remote:status').then(setD); }, []);
+  if (!d) return null;
+  const set = async (on: boolean) => { try { setD(await call('remote:set', on)); } catch (e) { toast((e as Error).message, 'error'); setD(await call('remote:status')); } };
+  return (
+    <section>
+      <h3>Gubbo on your iPhone</h3>
+      <p className="muted">Your phone becomes a microphone, speaker and screen for the Gubbo on this PC — same memory, same Claude key and budget, same voice. It works when the phone is on the same Wi-Fi as this PC and Gubbo Companion is running. Nothing is hosted online and it costs nothing.</p>
+      <p className="muted">An iPhone cannot show Gubbo on top of other apps or listen for a keyboard shortcut, so on the phone he is a full-screen page: tap him, talk, tap again.</p>
+      <Row label="Phone link" hint="Off by default. Only devices on your home network that have scanned the code can use it."><input type="checkbox" checked={d.enabled} disabled={!d.available} onChange={(e) => set(e.target.checked)} /></Row>
+      {d.error && <p className="notice bad">{d.error}</p>}
+      {d.running && d.qr && (
+        <div className="cards">
+          <div className="card"><img src={d.qr} alt="QR code to open Gubbo on your phone" width={220} height={220} /><p className="muted"><code>{d.url?.replace(/\?t=.*/, '')}</code></p></div>
+          <div className="card">
+            <ol className="steps">
+              <li>If Windows asks whether to allow Gubbo Companion on the network, choose <b>Allow</b> for <b>private networks</b>.</li>
+              <li>Point the iPhone camera at the code and open the link in Safari.</li>
+              <li>Safari will say “This Connection Is Not Private” because the page comes from your own PC rather than a website. Tap <b>Show Details → visit this website</b>. (Safari needs the secure connection before it allows the microphone.)</li>
+              <li>Tap <b>Share → Add to Home Screen</b> to get a Gubbo icon. Allow the microphone the first time you tap him.</li>
+            </ol>
+            <button onClick={async () => { setD(await call('remote:unpair')); toast('All phones were unpaired. Scan the new code to pair again.', 'ok'); }}>Unpair all phones</button>
+          </div>
+        </div>
+      )}
+      <p className="muted">Speech recognition and the natural voice must be downloaded in Settings → Voice. Without the natural voice the phone shows captions only.</p>
+    </section>
+  );
+}
+
 // ------------------------------------------------------------------ rules, data
 
 export function RulesSection() {

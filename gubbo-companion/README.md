@@ -30,7 +30,7 @@ The app opens a setup wizard. What it needs from Gavin:
 | Claude | In Claude **Settings → Billing**, claim the included API credit by linking a Console organization. In the Claude Console create a workspace and an API key for this app and paste the key into the app's key box (never into a chat). | Replies. |
 | Budget | In Console → Billing confirm auto-reload is **off** and there are no purchased credits, then type in the credit amount and expiry date the Console shows. | Cloud requests stay off until this is confirmed. |
 | Gubbo project | Choose **Use a local folder** if Gubbo is a folder on the PC, or **Import** files / pasted text if it is a Project inside Claude. | Starting with existing rules and history. |
-| Voice | **Download speech recognition** (one time: about 9 MB program + 78–488 MB model, checksum-verified). Pick and preview an installed Windows voice. | Talking instead of typing. |
+| Voice | **Download speech recognition** (one time: about 9 MB program + 78–488 MB model) and **Download the natural voice** (89 MB). Both are checksum-verified, free, and run on the PC. Pick a voice and preview it. | Talking instead of typing; a human-sounding Gubbo. |
 | YouTube | Create a free Google Cloud project, enable *YouTube Data API v3* and *YouTube Analytics API*, create a **Desktop app** OAuth client, paste its ID and secret, press **Connect YouTube**, confirm the channel. The wizard links to each page. | Channel briefings. |
 
 Things worth knowing:
@@ -71,6 +71,23 @@ gist. Click him to open the full panel; turn the mode off in Settings → Shortc
   edit or delete any of it.
 - Tray icon: Open, Talk, Channel briefing, Settings, Quit. Closing the window keeps it in the tray.
 
+## Gubbo on the iPhone
+
+Settings → **iPhone** → turn on **Phone link**, then scan the QR code with the iPhone camera. The phone
+opens a full-screen Gubbo page served by the PC: tap him, talk, tap again, and he answers in the same
+voice with captions. The phone is only a microphone, speaker and screen — recognition, Claude, memory
+and the budget stay on the PC, so nothing is hosted and nothing extra is paid for.
+
+- Works only while the PC is on, Gubbo Companion is running, and the phone is on the same Wi-Fi.
+- Safari shows "This Connection Is Not Private" once, because the page comes from your own PC with a
+  certificate it made for itself; choose *Show Details → visit this website*. Safari requires that
+  secure connection before it will allow the microphone.
+- Windows may ask to allow Gubbo Companion on **private networks** the first time (may need an
+  administrator to click Allow).
+- *Share → Add to Home Screen* gives a Gubbo icon. iOS does not let any app float over other apps or
+  listen for a global key, so there is no corner overlay on the phone.
+- Only devices on the home network that scanned the code can use it; **Unpair all phones** revokes them.
+
 ## Build from source (on Windows)
 
 Requires Node.js 22 or newer.
@@ -85,8 +102,9 @@ node scripts/verify-voice.mjs "release\win-unpacked\Gubbo Companion.exe"        
 ```
 
 `npm start` runs it unpackaged. The installer can also be cross-built on Linux (needs Wine with 32-bit
-support for the NSIS step). There are no native modules: storage uses the SQLite built into Electron's
-Node, secrets use Windows DPAPI through Electron `safeStorage`, speech uses installed Windows voices.
+support for the NSIS step). Storage uses the SQLite built into Electron's Node and secrets use Windows
+DPAPI through Electron `safeStorage`. The one native module is ONNX Runtime (prebuilt, no compiler
+needed), which runs the Kokoro voice model; installed Windows voices are the fallback.
 
 ## How it is put together
 
@@ -99,6 +117,8 @@ Node, secrets use Windows DPAPI through Electron `safeStorage`, speech uses inst
 | Gubbo folder / import / export | `src/main/context.ts` |
 | YouTube OAuth, API client, interpretation, narration | `src/main/youtube/` |
 | whisper.cpp download and transcription | `src/main/voice/whisper.ts` |
+| Natural voice (Kokoro via kokoro-js + ONNX Runtime) | `src/main/voice/neural.ts` |
+| iPhone link (HTTPS server + phone page) | `src/main/remote/server.ts`, `assets/phone/` |
 | Narrow preload bridge | `src/preload/preload.ts` |
 | Character window (skinview3d) and panel (React) | `src/renderer/` |
 

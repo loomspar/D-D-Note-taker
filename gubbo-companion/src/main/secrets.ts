@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 export interface Crypto { isEncryptionAvailable(): boolean; encryptString(s: string): Buffer; decryptString(b: Buffer): string }
-export type SecretName = 'anthropicKey' | 'ytClientId' | 'ytClientSecret' | 'ytRefreshToken';
+export type SecretName = 'anthropicKey' | 'ytClientId' | 'ytClientSecret' | 'ytRefreshToken' | 'remoteToken';
 
 export class Secrets {
   private cache = new Map<SecretName, string>();

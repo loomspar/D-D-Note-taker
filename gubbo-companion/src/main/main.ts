@@ -11,7 +11,11 @@ import { Budget } from './budget';
 import { NOTES_DIR, buildGubboExport, importFiles, importPasted, refreshImports, scanFolder, writeNoteToFolder } from './context';
 import { type DB, getSetting, openDb, setSetting } from './db';
 import { PRICING_CHECKED } from './pricing';
+import crypto from 'node:crypto';
+import QRCode from 'qrcode';
+import { PhoneRemote, pcmToWav } from './remote/server';
 import { clampToDisplays } from './screen';
+import { shortSpoken, toSpeakable } from './speechText';
 import { Secrets } from './secrets';
 import { loadSettings, saveSettings } from './settings';
 import { type StoredSkin, fetchSkinByUsername, validateSkinPng } from './skin';
@@ -42,6 +46,9 @@ let engine: ChatEngine;
 let yt: YouTubeService;
 let whisper: Whisper;
 let neural: NeuralVoice;
+let remote: PhoneRemote;
+let remoteConversationId: number | null = null;
+const turnWaiters = new Map<string, (ev: ChatEvent) => void>();
 let settings: Settings;
 let panel: BrowserWindow | null = null;
 let avatar: BrowserWindow | null = null;
@@ -117,10 +124,22 @@ async function init(): Promise<void> {
   app.on('will-quit', () => {
     globalShortcut.unregisterAll();
     engine.cancelAll();
+    remote?.stop();
     whisper.cancelDownload(); whisper.purgeTemp();
     if (!settings.history.saveTranscripts) engine.clearAllHistory();
     try { db.close(); } catch { /* already closed */ }
   });
+
+  remote = new PhoneRemote({
+    pageDir: path.join(app.getAppPath(), 'assets', 'phone'),
+    certFile: path.join(dataDir, 'phone-link-cert.json'),
+    token: remoteToken,
+    skinPng: () => { const s = currentSkin().skin; return s ? Buffer.from(s.png, 'base64') : null; },
+    transcribe: (wav) => whisper.transcribe(wav),
+    runTurn: remoteTurn,
+    synth: async (t) => { if (!neural.status().downloaded) return null; const r = await neural.synth(t, settings.voice.neuralVoice, settings.voice.rate); return pcmToWav(r.pcm, r.sampleRate); },
+  });
+  if (settings.remote.enabled && secrets.available && !SMOKE) startRemote().catch(() => { /* shown in Settings → iPhone */ });
 
   if (settings.gubbo.mode === 'folder' && settings.gubbo.folder) rescanGubbo();
   if (SMOKE) runSmoke();
@@ -307,6 +326,44 @@ function cancelInteraction(): void {
 
 function onChatEvent(ev: ChatEvent): void {
   send(panel, 'chat:event', ev);
+  if (ev.type === 'done' || ev.type === 'blocked' || ev.type === 'cancelled') { turnWaiters.get(ev.turnId)?.(ev); turnWaiters.delete(ev.turnId); }
+}
+
+/** One spoken turn started away from the panel (the phone). Same engine, budget gate and memory as the desktop. */
+async function remoteTurn(body: string): Promise<{ ok: boolean; reply: string }> {
+  const intent = detectIntent(body);
+  if (intent && yt.status().connected) {
+    const b = await briefing(intent, true);
+    const ex = engine.addLocalExchange(remoteConversationId, body, b.text, 'briefing');
+    remoteConversationId = ex.conversationId;
+    return { ok: b.ok, reply: b.text };
+  }
+  const turnId = crypto.randomUUID();
+  const ev = await new Promise<ChatEvent>((resolve) => {
+    turnWaiters.set(turnId, resolve);
+    void engine.send({ turnId, conversationId: remoteConversationId, text: body, mode: 'conversation', viaVoice: true });
+  });
+  if (ev.type === 'done') {
+    remoteConversationId = ev.message.conversationId;
+    const full = toSpeakable(ev.message.text);
+    return { ok: true, reply: full.length > 1800 ? shortSpoken(ev.message.text, 1500) : full };
+  }
+  if (ev.type === 'blocked') return { ok: false, reply: shortSpoken(ev.message, 300) };
+  return { ok: false, reply: 'That was cancelled.' };
+}
+
+/** A fixed address is honoured only in unpackaged development runs (for testing without a home network). */
+const startRemote = () => remote.start(47800, !app.isPackaged && process.env.GUBBO_DEV_REMOTE_IP ? [process.env.GUBBO_DEV_REMOTE_IP] : undefined);
+
+function remoteToken(): string {
+  let t = secrets.get('remoteToken');
+  if (!t) { t = crypto.randomBytes(24).toString('base64url'); secrets.set('remoteToken', t); }
+  return t;
+}
+
+async function remoteStatus(): Promise<{ enabled: boolean; running: boolean; available: boolean; url: string | null; qr: string | null; error: string | null }> {
+  const url = remote.urls()[0] ?? null;
+  return { enabled: settings.remote.enabled, running: remote.running, available: secrets.available, url, qr: url ? await QRCode.toDataURL(url, { margin: 1, width: 260, color: { dark: '#14101f', light: '#ffffff' } }) : null, error: remote.error };
 }
 
 // ---------------------------------------------------------------- helpers used by IPC
@@ -501,6 +558,14 @@ function registerIpc(): void {
 
   // ---- voice
   handle('voice:state', (s) => { if (['idle', 'listening', 'transcribing', 'thinking', 'speaking', 'celebrating', 'error'].includes(s)) setAvatarState(s); });
+  handle('remote:status', () => remoteStatus());
+  handle('remote:set', async (on) => {
+    if (on === true) { if (!secrets.available) throw new Error('Windows credential protection is needed for the phone link.'); await startRemote(); }
+    else remote.stop();
+    settings = saveSettings(db, { remote: { enabled: on === true } }); changed();
+    return remoteStatus();
+  });
+  handle('remote:unpair', async () => { secrets.clear('remoteToken'); remoteToken(); return remoteStatus(); });
   handle('tts:status', () => neural.status());
   handle('tts:prepare', async () => { await neural.prepare((p) => send(panel, 'tts:progress', p)); return neural.status(); });
   handle('tts:synth', async (p) => {

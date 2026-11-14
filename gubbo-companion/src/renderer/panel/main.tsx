@@ -6,7 +6,7 @@ import { ChannelScreen } from './channel';
 import { Markdown } from './md';
 import { MemoryScreen } from './memory';
 import { ProjectsScreen } from './projects';
-import { BudgetSection, CharacterSection, ClaudeSection, DataSection, GubboSection, RulesSection, ShortcutSection, VoiceSection, useAutosize } from './sections';
+import { BudgetSection, CharacterSection, ClaudeSection, DataSection, GubboSection, PhoneSection, RulesSection, ShortcutSection, VoiceSection, useAutosize } from './sections';
 
 const PHASE_LABEL: Record<string, string> = { idle: '', listening: 'Listening… press the shortcut again to send, Esc to cancel', transcribing: 'Transcribing on this PC…', thinking: 'Thinking…', speaking: 'Speaking', celebrating: '', error: '' };
 
@@ -97,7 +97,7 @@ function SettingsScreen() {
   const [sec, setSec] = useState('claude');
   const sections: [string, string, () => React.ReactNode][] = [
     ['claude', 'Claude', () => <><ClaudeSection /><BudgetSection /></>], ['voice', 'Voice', () => <VoiceSection />], ['character', 'Character', () => <CharacterSection />],
-    ['shortcut', 'Shortcut', () => <ShortcutSection />], ['gubbo', 'Gubbo project', () => <GubboSection />], ['rules', 'Rules', () => <RulesSection />], ['data', 'Data', () => <DataSection />],
+    ['shortcut', 'Shortcut', () => <ShortcutSection />], ['phone', 'iPhone', () => <PhoneSection />], ['gubbo', 'Gubbo project', () => <GubboSection />], ['rules', 'Rules', () => <RulesSection />], ['data', 'Data', () => <DataSection />],
   ];
   return (
     <div className="settings">

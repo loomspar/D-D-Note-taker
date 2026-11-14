@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Gubbo">
+<meta name="theme-color" content="#1b1a20">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icon.png">
+<link rel="stylesheet" href="/phone.css">
+<title>Gubbo</title>
+</head>
+<body>
+<main>
+  <p id="caption" aria-live="polite">Tap Gubbo and talk.</p>
+  <button id="gubbo" aria-label="Talk to Gubbo"><canvas id="skin" width="16" height="32"></canvas></button>
+  <p id="state">Ready</p>
+  <form id="typed"><input id="text" type="text" placeholder="…or type" autocomplete="off" enterkeyhint="send"><button>Send</button></form>
+</main>
+<script src="/phone.js"></script>
+</body>
+</html>

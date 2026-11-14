@@ -31,6 +31,8 @@ export interface Settings {
   gubbo: { mode: 'unset' | 'folder' | 'import' | 'later'; folder: string | null; lastFolderScan: string | null };
   /** Overlay behaviour: only the character on screen, replies spoken and captioned beside it. */
   companion: { minimal: boolean; captions: boolean };
+  /** iPhone link over the home network. Off until Gavin turns it on. */
+  remote: { enabled: boolean };
   rules: GubboRules;
 }
 
