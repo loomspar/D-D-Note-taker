@@ -13,7 +13,7 @@ API credit included with the Claude subscription) and read-only YouTube statisti
    machine in GitHub Actions: open the repository's **Actions** tab → latest **Gubbo Companion (Windows
    build)** run → **Artifacts** → `Gubbo-Companion-Setup`.
 2. Run it. It installs for the current user only (no administrator prompt) into
-   `%LOCALAPPDATA%\Programs\Gubbo Companion` and adds **Gubbo Companion** shortcuts to the desktop and Start menu.
+   `%LOCALAPPDATA%\Programs\gubbo-companion` and adds **Gubbo Companion** shortcuts to the desktop and Start menu.
 3. This personal build is not code-signed, so SmartScreen may show "Windows protected your PC" the first
    time. Choose **More info → Run anyway**. Do not turn off any Windows security feature for it.
 
