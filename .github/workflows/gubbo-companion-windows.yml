@@ -9,6 +9,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: gubbo-companion-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: windows-latest
@@ -34,10 +38,14 @@ jobs:
         shell: pwsh
         run: |
           $setup = Get-ChildItem release\Gubbo-Companion-Setup-*.exe | Select-Object -First 1
-          $p = Start-Process -FilePath $setup.FullName -ArgumentList '/S' -PassThru -Wait
+          # Wait for the installer itself only: it starts the app when it finishes, and the app keeps running.
+          $p = Start-Process -FilePath $setup.FullName -ArgumentList '/S' -PassThru
+          if (-not $p.WaitForExit(180000)) { $p.Kill(); throw 'Installer did not finish within 3 minutes' }
           if ($p.ExitCode -ne 0) { throw "Installer exited with $($p.ExitCode)" }
-          Start-Sleep -Seconds 5
+          Start-Sleep -Seconds 8
+          "App started by the installer: " + [bool](Get-Process 'Gubbo Companion' -ErrorAction SilentlyContinue)
           Get-Process 'Gubbo Companion' -ErrorAction SilentlyContinue | Stop-Process -Force
+          Start-Sleep -Seconds 2
           $lnk = Join-Path ([Environment]::GetFolderPath('Desktop')) 'Gubbo Companion.lnk'
           if (-not (Test-Path $lnk)) { throw "Desktop shortcut missing: $lnk" }
           $target = (New-Object -ComObject WScript.Shell).CreateShortcut($lnk).TargetPath

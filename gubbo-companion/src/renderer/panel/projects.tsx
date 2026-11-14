@@ -125,6 +125,7 @@ export function ProjectsScreen() {
               <input placeholder="Published video ID (optional)" defaultValue={v.publishedVideoId ?? ''} onBlur={(e) => { if ((e.target.value || null) !== v.publishedVideoId) void guard(() => call('video:update', { id: v.id, patch: { publishedVideoId: e.target.value.trim() || null } })); }} />
             </div>
             <label className="stack">Premise<textarea rows={3} value={v.premise} onChange={(e) => setD({ ...d, video: { ...v, premise: e.target.value } })} onBlur={(e) => guard(() => call('video:update', { id: v.id, patch: { premise: e.target.value } }))} /></label>
+            <label className="stack">Local assets (one file path or link per line)<textarea rows={2} defaultValue={v.assetLinks.join('\n')} key={`assets-${v.id}`} placeholder="D:\\Recordings\\one-chunk\\" onBlur={(e) => { const links = e.target.value.split('\n').map((x) => x.trim()).filter(Boolean); if (links.join('\n') !== v.assetLinks.join('\n')) void guard(() => call('video:update', { id: v.id, patch: { assetLinks: links } })); }} /></label>
             <div className="inline wrap">
               <button onClick={() => ask(`Let's develop my video “${v.title}” (video id ${v.id}). Read what's saved for it first, then tell me candidly what's weakest and what to do next.`, true)}>Brainstorm this with Gubbo</button>
               <button onClick={() => ask(`Score my video “${v.title}” (video id ${v.id}) using my Gubbo rules, save the score, and tell me the weakest part.`)}>Score it</button>
