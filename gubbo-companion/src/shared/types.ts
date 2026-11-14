@@ -24,7 +24,7 @@ export interface Settings {
   hotkey: string;
   launchAtLogin: boolean;
   avatar: { size: number; alwaysOnTop: boolean; visible: boolean; reducedMotion: boolean; x: number | null; y: number | null };
-  voice: { voiceName: string | null; rate: number; pitch: number; volume: number; speakReplies: boolean; whisperModel: string; micDeviceId: string | null };
+  voice: { engine: 'neural' | 'windows'; neuralVoice: string; voiceName: string | null; rate: number; pitch: number; volume: number; speakReplies: boolean; whisperModel: string; micDeviceId: string | null };
   ai: { conversationModel: string; deepModel: string; conversationEffort: Effort; deepEffort: Effort; webResearch: boolean; maxSearchesPerTurn: number };
   history: { saveTranscripts: boolean };
   youtube: { launchBriefing: boolean; channelConfirmedId: string | null };

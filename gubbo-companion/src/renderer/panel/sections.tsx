@@ -123,15 +123,24 @@ export function VoiceSection() {
   const [mics, setMics] = useState<MediaDeviceInfo[]>([]);
   const [w, setW] = useState<WhisperStatus | null>(null);
   const [progress, setProgress] = useState<{ received: number; total: number; step: string } | null>(null);
+  const [tts, setTts] = useState<{ downloaded: boolean; downloadBytes: number; error: string | null } | null>(null);
+  const [ttsProgress, setTtsProgress] = useState<{ received: number; total: number; step: string } | null>(null);
   const { info } = useApp();
+  const downloadVoice = async () => {
+    setTtsProgress({ received: 0, total: tts?.downloadBytes ?? 1, step: 'Starting…' });
+    try { setTts(await call('tts:prepare')); toast('The natural voice is ready.', 'ok'); }
+    catch (e) { toast((e as Error).message, 'error'); setTts(await call('tts:status')); } finally { setTtsProgress(null); }
+  };
   const loadMics = () => navigator.mediaDevices.enumerateDevices().then((d) => setMics(d.filter((x) => x.kind === 'audioinput'))).catch(() => setMics([]));
   useEffect(() => {
     void listVoices().then((all) => setVoices(all.filter((x) => x.localService)));
     void call<WhisperStatus>('whisper:status').then(setW);
     void loadMics();
     navigator.mediaDevices.addEventListener('devicechange', loadMics);
+    void call('tts:status').then(setTts);
     const off = on('whisper:progress', setProgress);
-    return () => { navigator.mediaDevices.removeEventListener('devicechange', loadMics); off(); };
+    const off2 = on('tts:progress', setTtsProgress);
+    return () => { navigator.mediaDevices.removeEventListener('devicechange', loadMics); off(); off2(); };
   }, [v.whisperModel]);
   const download = async () => {
     try { setProgress({ received: 0, total: w?.downloadBytes ?? 1, step: 'Starting…' }); setW(await call('whisper:download')); toast('Speech recognition is ready.', 'ok'); }
@@ -165,20 +174,39 @@ export function VoiceSection() {
           {mics.filter((m) => m.deviceId && m.deviceId !== 'default').map((m, i) => <option key={m.deviceId} value={m.deviceId}>{m.label || `Microphone ${i + 1}`}</option>)}
         </select>
       </Row>
-      <h4>Speaking (installed Windows voices)</h4>
-      {voices.length === 0
-        ? <p className="notice warn">No installed voices were found. Add one in Windows Settings → Time & language → Speech. Replies will still appear as text.</p>
-        : <Row label="Voice" hint="For a deeper voice, pick a male voice (for example David or Mark) and lower the pitch.">
+      <h4>Speaking</h4>
+      <Row label="Voice type" hint="The natural voice is generated on this PC by a free open model (Kokoro). Nothing is sent anywhere and it costs nothing.">
+        <select value={v.engine} onChange={(e) => patch({ voice: { engine: e.target.value } })}>
+          <option value="neural">Natural voice (recommended)</option><option value="windows">Windows built-in voice</option>
+        </select>
+      </Row>
+      {v.engine === 'neural' && tts && (
+        <>
+          {tts.downloaded
+            ? <Row label="Voice" hint="Try a few — Fenrir, Onyx and Lewis are the deeper ones.">
+                <select value={v.neuralVoice} onChange={(e) => patch({ voice: { neuralVoice: e.target.value } })}>
+                  {info.neuralVoices.map((x) => <option key={x.id} value={x.id}>{x.label}</option>)}
+                </select>
+              </Row>
+            : ttsProgress
+              ? <div><progress value={ttsProgress.received} max={ttsProgress.total} /> <span className="muted">{ttsProgress.step} — {mb(ttsProgress.received)} of {mb(ttsProgress.total)}</span></div>
+              : <div className="inline"><button className="primary" onClick={downloadVoice}>Download the natural voice ({mb(tts.downloadBytes)}, one time)</button><span className="muted">Until then Gubbo uses a Windows voice.</span></div>}
+          {tts.error && <p className="notice bad">{tts.error}</p>}
+        </>
+      )}
+      {v.engine === 'windows' && (voices.length === 0
+        ? <p className="notice warn">No installed voices were found. Add one in Windows Settings → Time & language → Speech. Replies will still appear as captions.</p>
+        : <><Row label="Voice">
             <select value={v.voiceName ?? ''} onChange={(e) => patch({ voice: { voiceName: e.target.value || null } })}>
               <option value="">Default English voice</option>
               {voices.map((x) => <option key={x.name} value={x.name}>{x.name} ({x.lang})</option>)}
             </select>
-          </Row>}
+          </Row>
+          <Row label={`Pitch ${v.pitch.toFixed(2)}`} hint="Lower is deeper."><input type="range" min={0.3} max={1.6} step={0.05} value={v.pitch} onChange={(e) => patch({ voice: { pitch: Number(e.target.value) } })} /></Row></>)}
       <Row label={`Speed ${v.rate.toFixed(2)}×`}><input type="range" min={0.6} max={1.8} step={0.05} value={v.rate} onChange={(e) => patch({ voice: { rate: Number(e.target.value) } })} /></Row>
-      <Row label={`Pitch ${v.pitch.toFixed(2)}`} hint="Lower is deeper."><input type="range" min={0.3} max={1.6} step={0.05} value={v.pitch} onChange={(e) => patch({ voice: { pitch: Number(e.target.value) } })} /></Row>
       <Row label={`Volume ${Math.round(v.volume * 100)}%`}><input type="range" min={0} max={1} step={0.05} value={v.volume} onChange={(e) => patch({ voice: { volume: Number(e.target.value) } })} /></Row>
       <div className="inline">
-        <button onClick={() => speaker.speak('Hey Gavin. This is how I sound. Want to plan the next video?', v)} disabled={!voices.length}>Preview voice</button>
+        <button onClick={() => speaker.speak('Hey Gavin. This is how I sound. Want to plan the next video?', v)}>Preview voice</button>
         <button onClick={() => speaker.stop()}>Stop</button>
       </div>
       <Row label="Speak replies aloud" hint="Short answer spoken; the full reply stays in the panel with a Read aloud button."><input type="checkbox" checked={v.speakReplies} onChange={(e) => patch({ voice: { speakReplies: e.target.checked } })} /></Row>

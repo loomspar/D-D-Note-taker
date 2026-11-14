@@ -98,28 +98,85 @@ export function listVoices(): Promise<SpeechSynthesisVoice[]> {
   });
 }
 
-/** Speech through the voices installed in Windows. No network service is involved for local voices. */
+/**
+ * Speech output. The default is the natural neural voice generated on this PC by the main process;
+ * if it is not downloaded yet or fails, the installed Windows voices are used instead.
+ */
 export class Speaker {
   private token = 0;
-  get speaking(): boolean { return speechSynthesis.speaking || speechSynthesis.pending; }
+  private ctx: AudioContext | null = null;
+  private source: AudioBufferSourceNode | null = null;
+  /** Set when the neural voice could not be used, so the UI can say why a Windows voice is speaking. */
+  lastFallback: string | null = null;
 
-  stop(): void { this.token++; speechSynthesis.cancel(); }
+  stop(): void {
+    this.token++;
+    speechSynthesis.cancel();
+    try { this.source?.stop(); } catch { /* not playing */ }
+    this.source = null;
+  }
 
-  /** Resolves true when the whole text was spoken, false if it was interrupted or no voice exists. */
+  /** Resolves true when the whole text was spoken, false if it was interrupted. */
   async speak(text: string, v: Settings['voice'], onPart?: (part: string) => void): Promise<boolean> {
     this.stop();
     const my = this.token;
+    const parts = chunkForSpeech(text, 260);
+    if (!parts.length) return true;
+    if (v.engine === 'neural') {
+      const r = await this.speakNeural(parts, v, my, onPart);
+      if (r !== 'unavailable') return r;
+      if (my !== this.token) return false;
+    }
+    return this.speakWindows(parts, v, my, onPart);
+  }
+
+  private fetchPart(part: string, v: Settings['voice']): Promise<{ pcm: ArrayBuffer; sampleRate: number }> {
+    return window.gubbo.invoke('tts:synth', { text: part, voice: v.neuralVoice, speed: v.rate }) as Promise<{ pcm: ArrayBuffer; sampleRate: number }>;
+  }
+
+  private async speakNeural(parts: string[], v: Settings['voice'], my: number, onPart?: (part: string) => void): Promise<boolean | 'unavailable'> {
+    try {
+      const st = (await window.gubbo.invoke('tts:status')) as { downloaded: boolean };
+      if (!st.downloaded) { this.lastFallback = 'The natural voice has not been downloaded yet.'; return 'unavailable'; }
+      this.ctx ??= new AudioContext();
+      if (this.ctx.state === 'suspended') await this.ctx.resume();
+      const gain = this.ctx.createGain(); gain.gain.value = v.volume; gain.connect(this.ctx.destination);
+      // Generate one sentence ahead so playback is continuous.
+      let next = this.fetchPart(parts[0], v);
+      for (let i = 0; i < parts.length; i++) {
+        let audio: { pcm: ArrayBuffer; sampleRate: number };
+        try { audio = await next; } catch (e) { if (i === 0) { this.lastFallback = (e as Error).message; return 'unavailable'; } throw e; }
+        if (my !== this.token) return false;
+        if (i + 1 < parts.length) next = this.fetchPart(parts[i + 1], v);
+        const samples = new Float32Array(audio.pcm);
+        const buf = this.ctx.createBuffer(1, samples.length, audio.sampleRate);
+        buf.copyToChannel(samples, 0);
+        onPart?.(parts[i]);
+        const done = await new Promise<boolean>((resolve) => {
+          const src = this.ctx!.createBufferSource();
+          src.buffer = buf; src.connect(gain);
+          src.onended = () => resolve(my === this.token);
+          this.source = src; src.start();
+        });
+        if (!done) return false;
+      }
+      this.lastFallback = null;
+      return my === this.token;
+    } catch { return false; }
+  }
+
+  private async speakWindows(parts: string[], v: Settings['voice'], my: number, onPart?: (part: string) => void): Promise<boolean> {
     const voices = await listVoices();
     if (my !== this.token) return false;
     // Only local (installed) voices: Chromium can list online voices, which would be a network service.
     const local = voices.filter((x) => x.localService);
     if (!local.length) {
       // No installed voice: still show the words as captions, paced roughly like speech.
-      for (const part of chunkForSpeech(text)) { if (my !== this.token) return false; onPart?.(part); await new Promise((r) => setTimeout(r, 900 + part.length * 55)); }
+      for (const part of parts) { if (my !== this.token) return false; onPart?.(part); await new Promise((r) => setTimeout(r, 900 + part.length * 55)); }
       return my === this.token;
     }
     const voice = local.find((x) => x.name === v.voiceName) ?? local.find((x) => x.lang.startsWith('en')) ?? local[0];
-    for (const part of chunkForSpeech(text)) {
+    for (const part of parts) {
       if (my !== this.token) return false;
       onPart?.(part);
       const ok = await new Promise<boolean>((resolve) => {

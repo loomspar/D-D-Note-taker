@@ -16,6 +16,7 @@ import { Secrets } from './secrets';
 import { loadSettings, saveSettings } from './settings';
 import { type StoredSkin, fetchSkinByUsername, validateSkinPng } from './skin';
 import { Store } from './store';
+import { NEURAL_VOICES, NeuralVoice, pcmToWav16k } from './voice/neural';
 import { Whisper, WHISPER_MODELS } from './voice/whisper';
 import { answerSubscribers, detectIntent, narrate } from './youtube/briefing';
 import { OAuthError, authorize, revoke } from './youtube/oauth';
@@ -40,6 +41,7 @@ let budget: Budget;
 let engine: ChatEngine;
 let yt: YouTubeService;
 let whisper: Whisper;
+let neural: NeuralVoice;
 let settings: Settings;
 let panel: BrowserWindow | null = null;
 let avatar: BrowserWindow | null = null;
@@ -79,6 +81,7 @@ async function init(): Promise<void> {
   budget = new Budget(db, () => secrets.has('anthropicKey'));
   whisper = new Whisper(path.join(dataDir, 'whisper'), () => settings.voice.whisperModel);
   whisper.purgeTemp();
+  neural = new NeuralVoice(path.join(dataDir, 'voice'));
   yt = new YouTubeService(db, {
     getClient: () => { const id = secrets.get('ytClientId'), sec = secrets.get('ytClientSecret'); return id && sec ? { clientId: id, clientSecret: sec } : null; },
     getRefreshToken: () => secrets.get('ytRefreshToken'),
@@ -377,7 +380,7 @@ function registerIpc(): void {
 
   // ---- app / settings
   handle('app:status', () => appStatus());
-  handle('app:info', () => ({ pricingChecked: PRICING_CHECKED, suggestedHotkeys: SUGGESTED_HOTKEYS, whisperModels: Object.entries(WHISPER_MODELS).map(([id, m]) => ({ id, label: m.label, mb: Math.round(m.bytes / 1e6) })), notesDir: NOTES_DIR }));
+  handle('app:info', () => ({ pricingChecked: PRICING_CHECKED, suggestedHotkeys: SUGGESTED_HOTKEYS, whisperModels: Object.entries(WHISPER_MODELS).map(([id, m]) => ({ id, label: m.label, mb: Math.round(m.bytes / 1e6) })), notesDir: NOTES_DIR, neuralVoices: NEURAL_VOICES }));
   handle('settings:get', () => settings);
   handle('settings:set', (patch) => {
     if (patch === null || typeof patch !== 'object' || 'hotkey' in patch) throw new Error('Invalid settings.');
@@ -498,6 +501,12 @@ function registerIpc(): void {
 
   // ---- voice
   handle('voice:state', (s) => { if (['idle', 'listening', 'transcribing', 'thinking', 'speaking', 'celebrating', 'error'].includes(s)) setAvatarState(s); });
+  handle('tts:status', () => neural.status());
+  handle('tts:prepare', async () => { await neural.prepare((p) => send(panel, 'tts:progress', p)); return neural.status(); });
+  handle('tts:synth', async (p) => {
+    const r = await neural.synth(text(p?.text, 600, 'text'), text(p?.voice, 40, 'voice'), Number(p?.speed) || 1);
+    return { pcm: r.pcm.buffer.slice(r.pcm.byteOffset, r.pcm.byteOffset + r.pcm.byteLength), sampleRate: r.sampleRate };
+  });
   handle('whisper:status', () => whisper.status());
   handle('whisper:download', async () => whisper.download((p) => send(panel, 'whisper:progress', p)));
   handle('whisper:cancel', () => whisper.cancelDownload());
@@ -713,6 +722,28 @@ async function voiceSmoke(report: Record<string, unknown>): Promise<void> {
     report.stateSequence = stateLog.join(' > ');
     report.escapeReleasedWhenIdle = !globalShortcut.isRegistered('Escape');
     report.requestsRecorded = budget.ledger().length;                   // must be 0: nothing was dispatched without a key
-    report.voiceOk = report.reachedListening === true && report.gotTranscript === true && report.requestsRecorded === 0;
+    // Neural voice round trip: generate speech in the packaged app, then recognise it with whisper.cpp.
+    const sentence = 'Your lava armor video is leading with sixteen thousand views.';
+    const t0 = Date.now();
+    await neural.prepare();
+    report.neuralLoadMs = Date.now() - t0;
+    const t1 = Date.now();
+    const spoken = await neural.synth(sentence, settings.voice.neuralVoice, 1);
+    report.neuralSynthMs = Date.now() - t1;
+    report.neuralAudioSeconds = Math.round((spoken.pcm.length / spoken.sampleRate) * 10) / 10;
+    report.neuralHeardBack = await whisper.transcribe(pcmToWav16k(spoken.pcm, spoken.sampleRate));
+    // The same audio through the panel's own playback path (IPC → AudioBuffer → Web Audio).
+    report.panelPlayback = await panel!.webContents.executeJavaScript(`(async () => {
+      const r = await window.gubbo.invoke('tts:synth', { text: 'Playback check.', voice: 'am_michael', speed: 1 });
+      const samples = new Float32Array(r.pcm); const ctx = new AudioContext();
+      const buf = ctx.createBuffer(1, samples.length, r.sampleRate); buf.copyToChannel(samples, 0);
+      let peak = 0; for (const v of samples) peak = Math.max(peak, Math.abs(v));
+      const played = await new Promise((res) => { const src = ctx.createBufferSource(); src.buffer = buf; src.connect(ctx.destination); src.onended = () => res(true); src.start(); setTimeout(() => res(false), 15000); });
+      return { samples: samples.length, sampleRate: r.sampleRate, peak: Math.round(peak * 100) / 100, played };
+    })()`);
+    const words = (s: string) => s.toLowerCase().replace(/[^a-z ]/g, '').split(/\s+/).filter(Boolean);
+    const got = new Set(words(String(report.neuralHeardBack)));
+    report.neuralWordMatch = words(sentence).filter((w) => got.has(w)).length / words(sentence).length;
+    report.voiceOk = report.reachedListening === true && report.gotTranscript === true && report.requestsRecorded === 0 && ((report.neuralWordMatch as number) >= 0.7 || !!process.env.GUBBO_WHISPER_CLI);
   } catch (e) { report.voiceError = String(e); report.voiceOk = false; }
 }

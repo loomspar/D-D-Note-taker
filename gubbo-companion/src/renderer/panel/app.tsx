@@ -4,7 +4,7 @@ import type { AppStatus, AvatarState, ChatEvent, ChatMessage, ChatMode, Conversa
 import { call, on } from '../bridge';
 import { MicError, Recorder, Speaker } from './voice';
 
-export interface AppInfo { pricingChecked: string; suggestedHotkeys: string[]; whisperModels: { id: string; label: string; mb: number }[]; notesDir: string }
+export interface AppInfo { pricingChecked: string; suggestedHotkeys: string[]; whisperModels: { id: string; label: string; mb: number }[]; notesDir: string; neuralVoices: { id: string; label: string }[] }
 export type Tab = 'chat' | 'projects' | 'channel' | 'memory' | 'settings';
 type ToastKind = 'ok' | 'warn' | 'error';
 

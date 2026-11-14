@@ -8,7 +8,7 @@ const INVOKE = new Set([
   'skin:get', 'skin:import', 'skin:fromUsername', 'bubble:set', 'skin:model', 'skin:remove',
   'key:set', 'key:clear', 'models:list', 'budget:status', 'budget:verify', 'budget:resolve',
   'chat:conversations', 'chat:messages', 'chat:delete', 'chat:clear', 'chat:cancel', 'chat:send',
-  'voice:state', 'voice:transcribe', 'whisper:status', 'whisper:download', 'whisper:cancel',
+  'voice:state', 'voice:transcribe', 'whisper:status', 'whisper:download', 'whisper:cancel', 'tts:status', 'tts:prepare', 'tts:synth',
   'yt:status', 'yt:setClient', 'yt:connect', 'yt:cancelConnect', 'yt:confirmChannel', 'yt:disconnect', 'yt:refresh', 'yt:briefing',
   'videos:list', 'video:get', 'video:create', 'video:update', 'video:delete', 'docs:list', 'doc:get', 'doc:save', 'doc:revert', 'doc:delete',
   'memory:list', 'memory:add', 'memory:update', 'memory:delete', 'source:add', 'source:delete', 'search', 'activity',
@@ -16,7 +16,7 @@ const INVOKE = new Set([
   'gubbo:list', 'gubbo:chooseFolder', 'gubbo:rescan', 'gubbo:disconnectFolder', 'gubbo:importFiles', 'gubbo:importPasted', 'gubbo:refreshImports', 'gubbo:remove', 'gubbo:later', 'gubbo:export',
   'backup:export', 'backup:restore',
 ]);
-const EVENTS = new Set(['chat:event', 'avatar:state', 'voice:toggle', 'voice:cancel', 'settings:changed', 'skin:changed', 'nav', 'briefing:request', 'whisper:progress', 'bubble']);
+const EVENTS = new Set(['chat:event', 'avatar:state', 'voice:toggle', 'voice:cancel', 'settings:changed', 'skin:changed', 'nav', 'briefing:request', 'whisper:progress', 'tts:progress', 'bubble']);
 
 contextBridge.exposeInMainWorld('gubbo', {
   async invoke(channel: string, payload?: unknown): Promise<unknown> {

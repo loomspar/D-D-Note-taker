@@ -7,7 +7,12 @@ files:
   - dist/**
   - assets/**
   - package.json
+  - '!node_modules/onnxruntime-node/bin/napi-v3/linux/**'
+  - '!node_modules/onnxruntime-node/bin/napi-v3/darwin/**'
+  - '!node_modules/onnxruntime-node/bin/napi-v3/win32/arm64/**'
 asar: true
+asarUnpack:
+  - node_modules/onnxruntime-node/**
 electronLanguages: [en-US]
 win:
   icon: assets/icon.png

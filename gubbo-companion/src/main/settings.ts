@@ -29,7 +29,7 @@ export const DEFAULT_SETTINGS: Settings = {
   hotkey: 'Control+Alt+G',
   launchAtLogin: false,
   avatar: { size: 220, alwaysOnTop: true, visible: true, reducedMotion: false, x: null, y: null },
-  voice: { voiceName: null, rate: 1, pitch: 0.9, volume: 1, speakReplies: true, whisperModel: 'base.en', micDeviceId: null },
+  voice: { engine: 'neural', neuralVoice: 'am_michael', voiceName: null, rate: 1, pitch: 0.9, volume: 1, speakReplies: true, whisperModel: 'base.en', micDeviceId: null },
   ai: { conversationModel: 'claude-opus-5-5', deepModel: 'claude-fable-5-2', conversationEffort: 'medium', deepEffort: 'high', webResearch: false, maxSearchesPerTurn: 3 },
   history: { saveTranscripts: true },
   youtube: { launchBriefing: true, channelConfirmedId: null },
