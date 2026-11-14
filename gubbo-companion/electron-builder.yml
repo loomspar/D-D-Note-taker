@@ -1,0 +1,27 @@
+appId: com.gavin.gubbo-companion
+productName: Gubbo Companion
+copyright: Personal build for Gavin
+directories:
+  output: release
+files:
+  - dist/**
+  - assets/**
+  - package.json
+asar: true
+electronLanguages: [en-US]
+win:
+  icon: assets/icon.png
+  target:
+    - target: nsis
+      arch: [x64]
+nsis:
+  # Per-user install: no administrator prompt, installs under %LOCALAPPDATA%\Programs.
+  oneClick: true
+  perMachine: false
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+  shortcutName: Gubbo Companion
+  runAfterFinish: true
+  deleteAppDataOnUninstall: false
+  artifactName: Gubbo-Companion-Setup-${version}.${ext}
+publish: null

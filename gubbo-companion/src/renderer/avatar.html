@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self'; connect-src 'self' blob: data:; worker-src 'self' blob:; base-uri 'none'; form-action 'none'">
+<title>Gubbo</title>
+<link rel="stylesheet" href="./avatar.css">
+</head>
+<body>
+<div id="stage">
+  <div id="badge" aria-live="polite"></div>
+  <canvas id="skin"></canvas>
+  <div id="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+  <div id="placeholder" hidden>Setup placeholder — import your skin</div>
+</div>
+<script type="module" src="./avatar.ts"></script>
+</body>
+</html>
