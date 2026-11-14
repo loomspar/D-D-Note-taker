@@ -29,6 +29,8 @@ export interface Settings {
   history: { saveTranscripts: boolean };
   youtube: { launchBriefing: boolean; channelConfirmedId: string | null };
   gubbo: { mode: 'unset' | 'folder' | 'import' | 'later'; folder: string | null; lastFolderScan: string | null };
+  /** Overlay behaviour: only the character on screen, replies spoken and captioned beside it. */
+  companion: { minimal: boolean; captions: boolean };
   rules: GubboRules;
 }
 
@@ -157,7 +159,7 @@ export interface AppStatus {
   version: string; platform: string; arch: string;
   hasApiKey: boolean; secureStorage: boolean;
   hotkey: { accelerator: string; registered: boolean; error: string | null };
-  skin: { imported: boolean; model: 'default' | 'slim' | 'auto-detect'; legacy: boolean };
+  skin: { imported: boolean; source: 'custom' | 'bundled' | 'none'; label: string; model: 'default' | 'slim' | 'auto-detect'; legacy: boolean };
   budget: BudgetStatus;
   dataDir: string;
 }

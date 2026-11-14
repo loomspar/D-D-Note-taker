@@ -61,13 +61,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const loadConversations = useCallback(async () => setConversations(await call<Conversation[]>('chat:conversations')), []);
 
   /** Speak, unless the microphone is open. Recording and speech never overlap. */
-  const say = useCallback(async (text: string) => {
+  const bubbleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** Caption beside the character. `holdMs` clears it afterwards; 0 keeps it until replaced. */
+  const caption = useCallback((text: string | null, kind: 'say' | 'heard' | 'problem' = 'say', holdMs = 0) => {
+    if (bubbleTimer.current) { clearTimeout(bubbleTimer.current); bubbleTimer.current = null; }
+    void call('bubble:set', text ? { text, kind } : null);
+    if (text && holdMs) bubbleTimer.current = setTimeout(() => void call('bubble:set', null), holdMs);
+  }, []);
+  const say = useCallback(async (text: string, kind: 'say' | 'problem' = 'say') => {
     const s = live.current.settings;
     if (!s || !text || recorder.recording) return;
     setPhase('speaking');
-    await speaker.speak(text, s.voice);
+    const finished = await speaker.speak(text, s.voice, (part) => caption(part, kind));
+    if (finished) caption(text.length > 160 ? null : text, kind, 3500); else if (!recorder.recording) caption(null);
     if (live.current.phase === 'speaking') setPhase('idle');
-  }, [recorder, speaker, setPhase]);
+  }, [recorder, speaker, setPhase, caption]);
   const readAloud = useCallback((md: string) => { void say(toSpeakable(md)); }, [say]);
 
   const flashError = useCallback(() => { setPhase('error'); setTimeout(() => { if (live.current.phase === 'error') setPhase('idle'); }, 2500); }, [setPhase]);
@@ -106,7 +114,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (ev.type === 'done') {
       settle(ev.userMessage, ev.message);
       if (ev.message.meta.toolNotes?.some((n) => /^(Saved|Remembered|Scored)/.test(n))) void refreshStatus();
-      if (live.current.settings?.voice.speakReplies) void say(ev.speak); else setPhase('idle');
+      // A spoken question gets its whole answer spoken; a typed one gets the short version (the rest is on screen).
+      const full = toSpeakable(ev.message.text);
+      const spoken = live.current.viaVoice && ev.message.role !== 'local' ? (full.length > 1800 ? `${shortSpoken(ev.message.text, 1500)}` : full) : ev.speak;
+      if (live.current.settings?.voice.speakReplies) void say(spoken); else { caption(shortSpoken(ev.message.text, 260), 'say', 9000); setPhase('idle'); }
     } else if (ev.type === 'cancelled') {
       settle(ev.userMessage, ev.message);
       if (!ev.userMessage) setDraft(live.current.pendingText);
@@ -117,12 +128,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setBanner({ text: ev.message, reason: ev.reason });
       void refreshStatus();
       flashError();
-      if (live.current.viaVoice && live.current.settings?.voice.speakReplies) void speaker.speak(shortSpoken(ev.message, 220), live.current.settings.voice);
+      const brief = shortSpoken(ev.message, 220);
+      caption(brief, 'problem', 12000);
+      if (live.current.viaVoice && live.current.settings?.voice.speakReplies) void speaker.speak(brief, live.current.settings.voice);
     }
   }, [loadConversations, refreshStatus, say, setPhase, flashError, speaker]);
 
   const cancelAll = useCallback(() => {
-    recorder.cancel(); speaker.stop();
+    recorder.cancel(); speaker.stop(); caption(null);
     if (live.current.turnId) void call('chat:cancel', live.current.turnId);
     if (live.current.phase !== 'thinking' || !live.current.turnId) setPhase('idle');
   }, [recorder, speaker, setPhase]);
@@ -133,16 +146,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const wav = await recorder.stop();           // microphone is released here, before anything else happens
       const text = await call<string | null>('voice:transcribe', wav);
       if (text === null) { setPhase('idle'); return; }              // cancelled with Esc
-      if (!text) { toast('I didn’t catch any words. Try again.', 'warn'); flashError(); return; }
+      if (!text) { toast('I didn’t catch any words. Try again.', 'warn'); caption('I didn’t catch that — try again.', 'problem', 5000); flashError(); return; }
+      caption(`“${text}”`, 'heard');
       const capture = live.current.capture;
       if (capture) { setPhase('idle'); capture(text); return; }
       send(text, { viaVoice: true });
     } catch (e) {
       if (live.current.phase !== 'transcribing') return;             // cancelled meanwhile
       toast((e as Error).message, e instanceof MicError && e.kind === 'silence' ? 'warn' : 'error');
+      caption((e as Error).message, 'problem', 9000);
       flashError();
     }
-  }, [recorder, send, setPhase, toast, flashError]);
+  }, [recorder, send, setPhase, toast, flashError, caption]);
 
   const voiceToggle = useCallback(async () => {
     const p = live.current.phase;
@@ -150,11 +165,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (p === 'transcribing' || p === 'thinking') { toast('Still working on the last one — press Esc to cancel it.', 'warn'); return; }
     speaker.stop();                                // never listen to our own voice
     const w = await call('whisper:status');
-    if (!w.binaryReady || !w.modelReady) { toast('Voice input isn’t set up yet. Download speech recognition in Settings → Voice, or type instead.', 'warn'); setTab('settings'); void call('panel:show', 'settings'); setPhase('idle'); return; }
+    if (!w.binaryReady || !w.modelReady) { toast('Voice input isn’t set up yet. Download speech recognition in Settings → Voice, or type instead.', 'warn'); caption('I can’t hear you yet — speech recognition needs a one-time download. I’ve opened Settings.', 'problem', 9000); setTab('settings'); void call('panel:show', 'settings'); setPhase('idle'); return; }
     try {
       await recorder.start(live.current.settings?.voice.micDeviceId ?? null);
+      caption(null);
       setPhase('listening');
-    } catch (e) { toast((e as Error).message, 'error'); flashError(); }
+    } catch (e) { toast((e as Error).message, 'error'); caption((e as Error).message, 'problem', 10000); flashError(); }
   }, [recorder, speaker, stopAndTranscribe, setPhase, toast, flashError]);
 
   const open = useCallback(async (id: number | null) => {
@@ -175,7 +191,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (convs[0]) { setConversationId(convs[0].id); setMode(convs[0].mode); setVideoId(convs[0].videoId); setMessages(await call<ChatMessage[]>('chat:messages', convs[0].id)); }
       live.current.settings = s;
       const b = await call<{ ok: boolean; text: string } | null>('panel:ready');
-      if (b?.ok) { toast(b.text, 'ok'); if (s.voice.speakReplies) void say(b.text); }
+      if (b?.ok) { if (s.voice.speakReplies) void say(b.text); else caption(shortSpoken(b.text, 260), 'say', 12000); }
+      else if (s.setupDone && s.companion.minimal) {
+        const key = st.hotkey.accelerator.replace('Control', 'Ctrl').replace(/\+/g, ' + ');
+        caption(st.budget.state === 'ok' ? `Press ${key} and talk to me.` : 'I’m not fully set up yet — click me to finish.', st.budget.state === 'ok' ? 'say' : 'problem', 9000);
+      }
     });
     recorder.onLost = () => { toast('The microphone was disconnected. Recording stopped.', 'error'); recorder.cancel(); flashError(); };
     const offs = [

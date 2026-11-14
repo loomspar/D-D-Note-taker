@@ -34,6 +34,7 @@ export const DEFAULT_SETTINGS: Settings = {
   history: { saveTranscripts: true },
   youtube: { launchBriefing: true, channelConfirmedId: null },
   gubbo: { mode: 'unset', folder: null, lastFolderScan: null },
+  companion: { minimal: true, captions: true },
   rules: SEED_RULES,
 };
 

@@ -9,6 +9,9 @@ const stage = document.getElementById('stage')!;
 const badge = document.getElementById('badge')!;
 const wave = document.getElementById('wave')!;
 const placeholder = document.getElementById('placeholder')!;
+const bubble = document.getElementById('bubble')!;
+const bubbleText = document.getElementById('bubble-text')!;
+let charSize = { width: window.innerWidth, height: window.innerHeight };
 
 let state: AvatarState = 'idle';
 let reduced = false;
@@ -63,7 +66,7 @@ function pose(p: PlayerObject, t: number): void {
 }
 let viewer: SkinViewer | null = null;
 try {
-  viewer = new SkinViewer({ canvas, width: window.innerWidth, height: window.innerHeight, enableControls: false, fov: 38, zoom: 0.82, pixelRatio: 'match-device' });
+  viewer = new SkinViewer({ canvas, width: charSize.width, height: charSize.height, enableControls: false, fov: 38, zoom: 0.82, pixelRatio: 'match-device' });
   viewer.camera.position.set(-18, 9, 62);
   viewer.camera.lookAt(0, 1.5, 0);
   viewer.globalLight.intensity = 2.6;
@@ -82,7 +85,7 @@ try {
 /** Front view of the skin (base layer plus outer layer) on a 2D canvas, pixel-for-pixel from the texture. */
 function drawFlat(img: CanvasImageSource, legacy: boolean, slim: boolean): void {
   const dpr = window.devicePixelRatio || 1;
-  canvas.width = window.innerWidth * dpr; canvas.height = window.innerHeight * dpr;
+  canvas.width = charSize.width * dpr; canvas.height = charSize.height * dpr;
   const g = canvas.getContext('2d');
   if (!g) return;
   g.imageSmoothingEnabled = false;
@@ -143,11 +146,18 @@ function applySkin(skin: { png: string; legacy: boolean; model: 'default' | 'sli
 }
 
 function applySettings(s: Settings): void {
+  // The character keeps a fixed size in the bottom-right corner; the window only grows to fit a caption.
+  const next = { width: Math.round(s.avatar.size), height: Math.round(s.avatar.size * 1.45) };
+  if (next.width !== charSize.width || next.height !== charSize.height) {
+    charSize = next;
+    if (viewer) viewer.setSize(charSize.width, charSize.height); else void call('skin:get').then(applySkin);
+  }
+  stage.style.width = `${charSize.width}px`; stage.style.height = `${charSize.height}px`;
+  document.body.style.setProperty('--char-h', `${charSize.height}px`);
   reduced = s.avatar.reducedMotion;
   document.body.classList.toggle('reduced', reduced);
 }
 
-window.addEventListener('resize', () => { if (viewer) viewer.setSize(window.innerWidth, window.innerHeight); else void call('skin:get').then(applySkin); });
 
 // Drag to move, click to open the panel, right-click for the menu.
 let drag: { x: number; y: number; moved: boolean } | null = null;
@@ -168,6 +178,12 @@ stage.addEventListener('pointerup', (e) => {
 });
 stage.addEventListener('contextmenu', (e) => { e.preventDefault(); void call('avatar:menu'); });
 
+on('bubble', (b: { text: string; kind: string } | null) => {
+  bubble.hidden = !b;
+  document.body.classList.toggle('captioned', !!b);
+  bubble.className = b?.kind === 'heard' ? 'heard' : b?.kind === 'problem' ? 'problem' : '';
+  bubbleText.textContent = b?.text ?? '';
+});
 on('avatar:state', setState);
 on('skin:changed', applySkin);
 on('settings:changed', applySettings);

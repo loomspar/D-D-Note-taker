@@ -106,17 +106,22 @@ export class Speaker {
   stop(): void { this.token++; speechSynthesis.cancel(); }
 
   /** Resolves true when the whole text was spoken, false if it was interrupted or no voice exists. */
-  async speak(text: string, v: Settings['voice']): Promise<boolean> {
+  async speak(text: string, v: Settings['voice'], onPart?: (part: string) => void): Promise<boolean> {
     this.stop();
     const my = this.token;
     const voices = await listVoices();
     if (my !== this.token) return false;
     // Only local (installed) voices: Chromium can list online voices, which would be a network service.
     const local = voices.filter((x) => x.localService);
-    if (!local.length) return false;
+    if (!local.length) {
+      // No installed voice: still show the words as captions, paced roughly like speech.
+      for (const part of chunkForSpeech(text)) { if (my !== this.token) return false; onPart?.(part); await new Promise((r) => setTimeout(r, 900 + part.length * 55)); }
+      return my === this.token;
+    }
     const voice = local.find((x) => x.name === v.voiceName) ?? local.find((x) => x.lang.startsWith('en')) ?? local[0];
     for (const part of chunkForSpeech(text)) {
       if (my !== this.token) return false;
+      onPart?.(part);
       const ok = await new Promise<boolean>((resolve) => {
         const u = new SpeechSynthesisUtterance(part);
         u.voice = voice; u.lang = voice.lang; u.rate = v.rate; u.pitch = v.pitch; u.volume = v.volume;

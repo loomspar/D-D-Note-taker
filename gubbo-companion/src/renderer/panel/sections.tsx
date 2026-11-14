@@ -18,6 +18,7 @@ const money = (n: number | null | undefined) => (n === null || n === undefined ?
 export function CharacterSection() {
   const { settings, patch, status, refreshStatus, toast } = useApp();
   const a = settings.avatar;
+  const [username, setUsername] = useState('');
   const importSkin = async () => {
     try { const s = await call('skin:import'); if (s) { toast(s.legacy ? 'Skin imported (older 64×32 format).' : 'Skin imported.', 'ok'); await refreshStatus(); } }
     catch (e) { toast((e as Error).message, 'error'); }
@@ -29,8 +30,13 @@ export function CharacterSection() {
       <div className="inline">
         <button className="primary" onClick={importSkin}>{status.skin.imported ? 'Replace skin…' : 'Import skin…'}</button>
         {status.skin.imported
-          ? <><span className="pill ok">Your skin is loaded{status.skin.legacy ? ' (legacy 64×32)' : ''}</span><button onClick={async () => { await call('skin:remove'); await refreshStatus(); }}>Remove</button></>
+          ? <><span className="pill ok">{status.skin.label}{status.skin.legacy ? ' (legacy 64×32)' : ''}</span>{status.skin.source === 'custom' && <button onClick={async () => { await call('skin:remove'); await refreshStatus(); }}>Back to the built-in Gubbo skin</button>}</>
           : <span className="pill warn">Showing a placeholder — not your skin</span>}
+      </div>
+      {status.skin.source === 'bundled' && <p className="muted">This is the skin currently set on the Minecraft account <b>GubboYT</b>, which matches your channel picture. If you change your skin, update it here.</p>}
+      <div className="inline">
+        <input placeholder="Minecraft username" value={username} maxLength={16} onChange={(e) => setUsername(e.target.value)} />
+        <button disabled={username.trim().length < 3} onClick={async () => { try { const s = await call('skin:fromUsername', username); toast(`Loaded the skin from ${s.label}.`, 'ok'); setUsername(''); await refreshStatus(); } catch (e) { toast((e as Error).message, 'error'); } }}>Get skin from Minecraft</button>
       </div>
       {status.skin.imported && (
         <Row label="Arm type" hint="Auto-detect reads it from the texture.">
@@ -95,6 +101,12 @@ export function ShortcutSection() {
         <li>Press again: your words are transcribed and sent.</li>
         <li>Esc cancels listening, thinking or speaking. Esc is only captured while one of those is happening.</li>
       </ul>
+      <Row label="Just Gubbo" hint="Pressing the shortcut shows only the character: you talk, he answers out loud. The panel stays hidden until you click him.">
+        <input type="checkbox" checked={settings.companion.minimal} onChange={(e) => patch({ companion: { minimal: e.target.checked } })} />
+      </Row>
+      <Row label="Captions beside Gubbo" hint="Shows what he heard and what he is saying.">
+        <input type="checkbox" checked={settings.companion.captions} onChange={(e) => patch({ companion: { captions: e.target.checked } })} />
+      </Row>
       <Row label="Start with Windows" hint="The shortcut only works while Gubbo Companion is running — it cannot start an app that has been quit.">
         <input type="checkbox" checked={settings.launchAtLogin} onChange={(e) => patch({ launchAtLogin: e.target.checked })} />
       </Row>

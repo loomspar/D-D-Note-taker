@@ -10,6 +10,8 @@ import type { Store } from './store';
 import { TOOL_DEFS, TOOL_NAMES, type ToolDeps, runTool } from './tools';
 
 const MAX_ITERATIONS = 6;
+/** Added to turns Gavin spoke: the whole reply is read aloud by the character, with no panel in view. */
+const SPOKEN_NOTE = 'Gavin said this out loud and will hear your whole reply spoken by the character, usually without the panel open. Answer the way you would say it to him: plain sentences, no lists, headings or symbols, and only as long as is worth listening to. If the useful answer is long or structured (a script, a checklist, a shortlist with scores), save it with your tools and tell him in a sentence or two what you saved and the main point.';
 const MAX_TOKENS: Record<ChatMode, number> = { conversation: 8000, deep: 20000 };
 
 export interface EngineDeps {
@@ -128,7 +130,7 @@ export class ChatEngine {
     const system: Anthropic.TextBlockParam[] = [{ type: 'text', text: systemText, cache_control: { type: 'ephemeral' } }];
     const tools = this.tools(s);
     const userContent: Anthropic.ContentBlockParam[] = [
-      { type: 'text', text: buildContextBlock(store.search(text, 6), new Date(), input.extraContext) },
+      { type: 'text', text: buildContextBlock(store.search(text, 6), new Date(), [input.extraContext, input.viaVoice ? SPOKEN_NOTE : null].filter(Boolean).join('\n') || undefined) },
       { type: 'text', text },
     ];
     let messages: Anthropic.MessageParam[] = [...(conv ? this.history(conv.id) : []), { role: 'user', content: userContent }];

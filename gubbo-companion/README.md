@@ -25,7 +25,7 @@ The app opens a setup wizard. What it needs from Gavin:
 
 | Step | What to do | Needed for |
 |---|---|---|
-| Character | **Import skin…** and pick the skin PNG (64×64, or 64×32 for old skins) from minecraft.net → Profile → Skin or the launcher. | The character. Until then a labelled placeholder is shown. |
+| Character | Nothing: the Gubbo skin (the one on the Minecraft account **GubboYT**, matching the channel picture) is built in. To change it, type a Minecraft username or import a skin PNG. | The character. |
 | Shortcut | Default is **Ctrl + Alt + G**. If another program owns it the app says so and offers alternatives. | Summoning by keyboard. |
 | Claude | In Claude **Settings → Billing**, claim the included API credit by linking a Console organization. In the Claude Console create a workspace and an API key for this app and paste the key into the app's key box (never into a chat). | Replies. |
 | Budget | In Console → Billing confirm auto-reload is **off** and there are no purchased credits, then type in the credit amount and expiry date the Console shows. | Cloud requests stay off until this is confirmed. |
@@ -52,6 +52,11 @@ Things worth knowing:
   curves. They are left out rather than estimated.
 
 ## Using it
+
+By default the app runs in **Just Gubbo** mode: the only thing on screen is the character in the corner.
+Press the shortcut, talk, press it again — he answers out loud, with captions beside him. Long or
+structured answers (scripts, checklists, scored shortlists) are saved to the video and he tells you the
+gist. Click him to open the full panel; turn the mode off in Settings → Shortcut.
 
 - **Ctrl + Alt + G** once: Gubbo appears, stops talking and listens. Again: transcribe and send.
   **Esc**: cancel listening, thinking or speaking (Esc is only captured while one of those is active).

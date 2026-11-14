@@ -7,7 +7,7 @@ import { openDb } from '../src/main/db';
 import { clampToDisplays } from '../src/main/screen';
 import { Secrets } from '../src/main/secrets';
 import { SEED_RULES, displayScore, loadSettings, saveSettings } from '../src/main/settings';
-import { validateSkinPng } from '../src/main/skin';
+import { fetchSkinByUsername, validateSkinPng } from '../src/main/skin';
 import { chunkForSpeech, shortSpoken, toSpeakable } from '../src/main/speechText';
 import { Store } from '../src/main/store';
 import { runTool, validateInput } from '../src/main/tools';
@@ -178,5 +178,24 @@ describe('settings, secrets and small validators', () => {
     expect(cleanTranscript(' [BLANK_AUDIO] ')).toBe('');
     expect(cleanTranscript('Give me five ideas (wind blowing) for long-form.\n')).toBe('Give me five ideas for long-form.');
     expect(recommendModel(16, 32)).toBe('small.en'); expect(recommendModel(4, 8)).toBe('base.en'); expect(recommendModel(2, 4)).toBe('tiny.en');
+  });
+});
+
+describe('skin from a Minecraft username', () => {
+  const png = fs.readFileSync(path.join(__dirname, '..', 'assets', 'gubbo-skin.png'));
+  const fake = (textureUrl: string, model?: string) => (async (input: any) => {
+    const url = String(input);
+    if (url.includes('api.mojang.com')) return url.endsWith('/Nobody') ? new Response('{}', { status: 404 }) : new Response(JSON.stringify({ id: 'abc', name: 'GubboYT' }));
+    if (url.includes('sessionserver')) return new Response(JSON.stringify({ properties: [{ name: 'textures', value: Buffer.from(JSON.stringify({ textures: { SKIN: { url: textureUrl, metadata: model ? { model } : undefined } } })).toString('base64') }] }));
+    return new Response(png);
+  }) as typeof fetch;
+  it('ships a valid built-in Gubbo skin texture', () => { expect(validateSkinPng(png)).toEqual({ width: 64, height: 64, legacy: false }); });
+  it('downloads only from Minecraft’s texture host and records the arm type', async () => {
+    const s = await fetchSkinByUsername('GubboYT', fake('http://textures.minecraft.net/texture/abc', 'slim'));
+    expect(s).toMatchObject({ model: 'slim', legacy: false, label: 'Minecraft account GubboYT' });
+    expect(Buffer.from(s.png, 'base64').equals(png)).toBe(true);
+    await expect(fetchSkinByUsername('GubboYT', fake('https://evil.example/skin.png'))).rejects.toThrow(/texture server/);
+    await expect(fetchSkinByUsername('Nobody', fake('x'))).rejects.toThrow(/no Minecraft Java account/);
+    await expect(fetchSkinByUsername('../etc', fake('x'))).rejects.toThrow(/username/);
   });
 });

@@ -14,7 +14,7 @@ import { PRICING_CHECKED } from './pricing';
 import { clampToDisplays } from './screen';
 import { Secrets } from './secrets';
 import { loadSettings, saveSettings } from './settings';
-import { validateSkinPng } from './skin';
+import { type StoredSkin, fetchSkinByUsername, validateSkinPng } from './skin';
 import { Store } from './store';
 import { Whisper, WHISPER_MODELS } from './voice/whisper';
 import { answerSubscribers, detectIntent, narrate } from './youtube/briefing';
@@ -156,7 +156,7 @@ function createPanel(): void {
   });
   void panel.loadFile(page('panel.html'));
   // Started by Windows at sign-in (--hidden): stay in the tray with just the character showing.
-  panel.once('ready-to-show', () => { if (!settings.setupDone || !process.argv.includes('--hidden')) panel?.show(); });
+  panel.once('ready-to-show', () => { if (!settings.setupDone || (!process.argv.includes('--hidden') && !settings.companion.minimal)) panel?.show(); });
   panel.on('close', (e) => { if (!quitting) { e.preventDefault(); panel?.hide(); } });
 }
 
@@ -186,15 +186,35 @@ function keepAvatarReachable(): void {
   if (pos.x !== b.x || pos.y !== b.y) { avatar.setPosition(pos.x, pos.y); saveAvatarPosition(); }
 }
 
+/** The character sits in the bottom-right of its window; the saved position is that of the character itself. */
 function saveAvatarPosition(): void {
   if (!avatar || avatar.isDestroyed()) return;
-  const [x, y] = avatar.getPosition();
-  settings = saveSettings(db, { avatar: { x, y } });
+  const b = avatar.getBounds(), c = avatarSize();
+  settings = saveSettings(db, { avatar: { x: b.x + b.width - c.width, y: b.y + b.height - c.height } });
+}
+
+let bubbleOpen = false;
+/** Show or clear the caption beside the character. The window grows up and to the left to make room. */
+function setBubble(payload: { text: string; kind: string } | null): void {
+  if (!avatar || avatar.isDestroyed()) return;
+  const show = !!payload && settings.companion.captions;
+  if (show !== bubbleOpen) {
+    bubbleOpen = show;
+    const b = avatar.getBounds(), c = avatarSize();
+    const right = b.x + b.width, bottom = b.y + b.height;
+    const width = show ? Math.max(c.width, 400) : c.width, height = show ? c.height + 170 : c.height;
+    const area = screen.getDisplayMatching(b).workArea;
+    avatar.setResizable(true);
+    avatar.setBounds({ x: Math.max(area.x, right - width), y: Math.max(area.y, bottom - height), width, height });
+    avatar.setResizable(false);
+  }
+  send(avatar, 'bubble', show ? payload : null);
 }
 
 function applyAvatarSettings(): void {
   if (!avatar || avatar.isDestroyed()) return;
   const { width, height } = avatarSize();
+  bubbleOpen = false; send(avatar, 'bubble', null);
   avatar.setResizable(true); avatar.setSize(width, height); avatar.setResizable(false);
   avatar.setAlwaysOnTop(settings.avatar.alwaysOnTop, 'floating');
   if (settings.avatar.visible) { if (!avatar.isVisible()) avatar.showInactive(); } else avatar.hide();
@@ -260,7 +280,8 @@ function registerHotkey(acc: string): { ok: boolean; error: string | null } {
 function toggleTalk(): void {
   if (settings.avatar.visible && avatar && !avatar.isVisible()) avatar.showInactive();
   if (!panel || panel.isDestroyed()) createPanel();
-  if (!panel!.isVisible()) panel!.showInactive();
+  // In companion mode the panel stays out of the way: only Gubbo is on screen.
+  if (!settings.companion.minimal && !panel!.isVisible()) panel!.showInactive();
   send(panel, 'voice:toggle');
 }
 
@@ -287,12 +308,24 @@ function onChatEvent(ev: ChatEvent): void {
 
 // ---------------------------------------------------------------- helpers used by IPC
 
+let bundledSkin: StoredSkin | null | undefined;
+/** Gavin's own skin: a custom import if there is one, otherwise the Gubbo skin shipped with the app. */
+function currentSkin(): { skin: StoredSkin | null; source: 'custom' | 'bundled' | 'none' } {
+  const custom = getSetting<StoredSkin | null>(db, 'skin', null);
+  if (custom) return { skin: { ...custom, label: custom.label ?? 'Imported file' }, source: 'custom' };
+  if (bundledSkin === undefined) {
+    try { const bytes = fs.readFileSync(asset('gubbo-skin.png')); const info = validateSkinPng(bytes); bundledSkin = { png: bytes.toString('base64'), legacy: info.legacy, model: 'default', label: 'Gubbo (Minecraft account GubboYT)' }; }
+    catch { bundledSkin = null; }
+  }
+  return bundledSkin ? { skin: bundledSkin, source: 'bundled' } : { skin: null, source: 'none' };
+}
+
 function appStatus(): AppStatus {
-  const skin = getSetting<{ png: string; legacy: boolean; model: 'default' | 'slim' | 'auto-detect' } | null>(db, 'skin', null);
+  const { skin, source } = currentSkin();
   return {
     version: app.getVersion(), platform: process.platform, arch: process.arch,
     hasApiKey: secrets.has('anthropicKey'), secureStorage: secrets.available,
-    hotkey, skin: { imported: !!skin, model: skin?.model ?? 'auto-detect', legacy: !!skin?.legacy },
+    hotkey, skin: { imported: !!skin, source, label: skin?.label ?? '', model: skin?.model ?? 'auto-detect', legacy: !!skin?.legacy },
     budget: budget.status(), dataDir: app.getPath('userData'),
   };
 }
@@ -381,28 +414,35 @@ function registerIpc(): void {
   handle('avatar:click', () => { if (panel?.isVisible() && panel.isFocused()) panel.hide(); else showPanel(); });
   handle('avatar:menu', () => { Menu.buildFromTemplate(menuTemplate()).popup({ window: avatar ?? undefined }); });
   handle('avatar:talk', () => toggleTalk());
+  handle('bubble:set', (p) => setBubble(p && typeof p.text === 'string' && p.text.trim() ? { text: p.text.slice(0, 600), kind: typeof p.kind === 'string' ? p.kind.slice(0, 20) : 'say' } : null));
 
   // ---- skin
-  handle('skin:get', () => getSetting(db, 'skin', null));
+  handle('skin:get', () => currentSkin().skin);
+  handle('skin:fromUsername', async (name) => {
+    const skin = await fetchSkinByUsername(text(name, 16, 'username').trim());
+    setSetting(db, 'skin', skin);
+    broadcast('skin:changed', skin);
+    return skin;
+  });
   handle('skin:import', async () => {
     const r = await dialog.showOpenDialog(panel!, { title: 'Choose your Minecraft skin file', filters: [{ name: 'Minecraft skin (PNG)', extensions: ['png'] }], properties: ['openFile'] });
     if (r.canceled || !r.filePaths[0]) return null;
     if (fs.statSync(r.filePaths[0]).size > 200_000) throw new Error('That file is too large to be a skin texture.');
     const bytes = fs.readFileSync(r.filePaths[0]);
     const info = validateSkinPng(bytes);
-    const skin = { png: bytes.toString('base64'), legacy: info.legacy, model: 'auto-detect' as const };
+    const skin: StoredSkin = { png: bytes.toString('base64'), legacy: info.legacy, model: 'auto-detect', label: `File ${path.basename(r.filePaths[0])}` };
     setSetting(db, 'skin', skin);
     broadcast('skin:changed', skin);
     return skin;
   });
   handle('skin:model', (model) => {
     if (!['default', 'slim', 'auto-detect'].includes(model)) throw new Error('Invalid arm type.');
-    const skin = getSetting<any>(db, 'skin', null);
+    const skin = currentSkin().skin ? { ...currentSkin().skin! } : null;
     if (!skin) throw new Error('Import a skin first.');
     skin.model = model; setSetting(db, 'skin', skin); broadcast('skin:changed', skin);
     return skin;
   });
-  handle('skin:remove', () => { db.prepare("DELETE FROM settings WHERE key = 'skin'").run(); broadcast('skin:changed', null); });
+  handle('skin:remove', () => { db.prepare("DELETE FROM settings WHERE key = 'skin'").run(); broadcast('skin:changed', currentSkin().skin); });
 
   // ---- Claude key, models, budget
   handle('key:set', async (key) => {

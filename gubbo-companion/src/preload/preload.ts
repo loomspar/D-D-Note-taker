@@ -5,7 +5,7 @@ import { contextBridge, ipcRenderer } from 'electron';
 const INVOKE = new Set([
   'app:status', 'app:info', 'app:quit', 'settings:get', 'settings:set', 'hotkey:set', 'external:open', 'panel:show', 'panel:ready',
   'avatar:move', 'avatar:moved', 'avatar:click', 'avatar:menu', 'avatar:talk',
-  'skin:get', 'skin:import', 'skin:model', 'skin:remove',
+  'skin:get', 'skin:import', 'skin:fromUsername', 'bubble:set', 'skin:model', 'skin:remove',
   'key:set', 'key:clear', 'models:list', 'budget:status', 'budget:verify', 'budget:resolve',
   'chat:conversations', 'chat:messages', 'chat:delete', 'chat:clear', 'chat:cancel', 'chat:send',
   'voice:state', 'voice:transcribe', 'whisper:status', 'whisper:download', 'whisper:cancel',
@@ -16,7 +16,7 @@ const INVOKE = new Set([
   'gubbo:list', 'gubbo:chooseFolder', 'gubbo:rescan', 'gubbo:disconnectFolder', 'gubbo:importFiles', 'gubbo:importPasted', 'gubbo:refreshImports', 'gubbo:remove', 'gubbo:later', 'gubbo:export',
   'backup:export', 'backup:restore',
 ]);
-const EVENTS = new Set(['chat:event', 'avatar:state', 'voice:toggle', 'voice:cancel', 'settings:changed', 'skin:changed', 'nav', 'briefing:request', 'whisper:progress']);
+const EVENTS = new Set(['chat:event', 'avatar:state', 'voice:toggle', 'voice:cancel', 'settings:changed', 'skin:changed', 'nav', 'briefing:request', 'whisper:progress', 'bubble']);
 
 contextBridge.exposeInMainWorld('gubbo', {
   async invoke(channel: string, payload?: unknown): Promise<unknown> {
