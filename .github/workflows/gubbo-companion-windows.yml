@@ -1,0 +1,54 @@
+name: Gubbo Companion (Windows build)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [claude/gubbo-companion-windows-dazcdb]
+    paths: ['gubbo-companion/**', '.github/workflows/gubbo-companion-windows.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: gubbo-companion
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: gubbo-companion/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - name: Build installer
+        run: npm run dist
+      - name: Smoke test the packaged app
+        run: node scripts/smoke.mjs "release/win-unpacked/Gubbo Companion.exe"
+      - name: Install per-user and check the desktop shortcut
+        shell: pwsh
+        run: |
+          $setup = Get-ChildItem release\Gubbo-Companion-Setup-*.exe | Select-Object -First 1
+          $p = Start-Process -FilePath $setup.FullName -ArgumentList '/S' -PassThru -Wait
+          if ($p.ExitCode -ne 0) { throw "Installer exited with $($p.ExitCode)" }
+          Start-Sleep -Seconds 5
+          Get-Process 'Gubbo Companion' -ErrorAction SilentlyContinue | Stop-Process -Force
+          $lnk = Join-Path ([Environment]::GetFolderPath('Desktop')) 'Gubbo Companion.lnk'
+          if (-not (Test-Path $lnk)) { throw "Desktop shortcut missing: $lnk" }
+          $target = (New-Object -ComObject WScript.Shell).CreateShortcut($lnk).TargetPath
+          if (-not (Test-Path $target)) { throw "Shortcut target missing: $target" }
+          if ($target -notlike "$env:LOCALAPPDATA*") { throw "Not a per-user install: $target" }
+          "Shortcut OK -> $target"
+          node scripts/smoke.mjs "$target"
+      - name: Voice pipeline (Windows voice -> whisper.cpp)
+        run: node scripts/verify-voice.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Gubbo-Companion-Setup
+          path: gubbo-companion/release/Gubbo-Companion-Setup-*.exe
+          if-no-files-found: error

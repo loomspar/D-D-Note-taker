@@ -117,7 +117,8 @@ export class Whisper {
         await downloadVerified(b.url, zip, b.sha256, (r) => onProgress({ received: r, total, step: 'Downloading whisper.cpp' }), ctl.signal);
         fs.mkdirSync(this.binDir, { recursive: true });
         // tar.exe ships with Windows 10 and later and extracts zip archives.
-        const r = await run('tar', ['-xf', zip, '-C', this.binDir], { timeoutMs: 120_000 });
+        const tar = path.join(process.env.SystemRoot ?? 'C:\\Windows', 'System32', 'tar.exe');
+        const r = await run(tar, ['-xf', zip, '-C', this.binDir], { timeoutMs: 120_000 });
         fs.rmSync(zip, { force: true });
         if (r.code !== 0 || !this.cli()) throw new Error(`Could not unpack whisper.cpp (${r.stderr.trim().slice(0, 200) || 'whisper-cli.exe not found in the archive'}).`);
         base = b.bytes;
