@@ -1,0 +1,601 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		08C000F4504AF04D7E5174E8 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 536158FA7A347A47BA33A1D5 /* HomeView.swift */; };
+		19C428DA9E70D8E5DB27958D /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E817E99CFC804CE5A08EC6 /* SettingsView.swift */; };
+		1D39540BC52E61A5FC368D17 /* Recorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99A57D707D88777DEBBB91A0 /* Recorder.swift */; };
+		290FC29287623C0A5879D2B3 /* OnDeviceSummarizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A76033E1DF6C3D668D59DB8 /* OnDeviceSummarizer.swift */; };
+		2CBEE8B1FA0FEC1442FBE34C /* RambleWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3837C7EDB7E456D8923353AF /* RambleWidget.swift */; };
+		47023E9B7BA4C31D4331AE69 /* WidgetSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AFA38D9288F66E40B4BCF35 /* WidgetSnapshot.swift */; };
+		47DA4534A9AB36F250DA7579 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F73262E9981E2809A5A698D8 /* Assets.xcassets */; };
+		4862DBA717C85F85A615986C /* WidgetSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AFA38D9288F66E40B4BCF35 /* WidgetSnapshot.swift */; };
+		51E194EA927EA31B63A99C74 /* StartBrainstormIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7EF3E3F58ECFACE84953BCD /* StartBrainstormIntent.swift */; };
+		58EA4D70278D5BA7BB725658 /* RambleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B0C51CA59E725809502FE72 /* RambleApp.swift */; };
+		697EF797319F9F9982D19FA7 /* SessionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E1E572ECB933420FDE70D51 /* SessionDetailView.swift */; };
+		6A11E34C294B246C13A5378C /* SessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E71C2997394A96FFE659DA73 /* SessionStore.swift */; };
+		8107093583AF95C8C40AFE1F /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6075D72D63869EF46130607 /* Components.swift */; };
+		84362241E202BEC042479710 /* Pipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = E55F575E342FF4AF166F7A6C /* Pipeline.swift */; };
+		A14962373F92B1B88A06F60F /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6523070260D1C480DAFA8059 /* Keychain.swift */; };
+		B9A63EC1BFCF8D2D8F9102D2 /* RecordingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E8B3F7EFA2716A35F115BC6 /* RecordingView.swift */; };
+		D3DB1D0169678142D0CA6AB5 /* Transcriber.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3935CD7DA7B81114FA1195D2 /* Transcriber.swift */; };
+		DF20CCC5E1B95F0ADD22DFA8 /* Summarizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F87E7EE3F9CB68EAC8D8B511 /* Summarizer.swift */; };
+		F06169C9A55BCDB761A1DD40 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CCBB3B0FEEC06FBFE986267 /* AppModel.swift */; };
+		F7B1146F03F94C65AD6E9095 /* RambleWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 26EE1775E6FB8705FC60C6F0 /* RambleWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		FF4526823402D0038A3925FB /* BrainstormSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D870C995BC6AB7FE5524399 /* BrainstormSession.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		B0E7591E52F71FE2E5DB51F9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = ECBA0FE60A0F61C53D060EC7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 48E251E4442C8F465AAE5D8B;
+			remoteInfo = RambleWidget;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		D5248230C070D20456807BCD /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				F7B1146F03F94C65AD6E9095 /* RambleWidget.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		1A76033E1DF6C3D668D59DB8 /* OnDeviceSummarizer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnDeviceSummarizer.swift; sourceTree = "<group>"; };
+		26EE1775E6FB8705FC60C6F0 /* RambleWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = RambleWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		2E1E572ECB933420FDE70D51 /* SessionDetailView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SessionDetailView.swift; sourceTree = "<group>"; };
+		3837C7EDB7E456D8923353AF /* RambleWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RambleWidget.swift; sourceTree = "<group>"; };
+		3935CD7DA7B81114FA1195D2 /* Transcriber.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Transcriber.swift; sourceTree = "<group>"; };
+		3D870C995BC6AB7FE5524399 /* BrainstormSession.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BrainstormSession.swift; sourceTree = "<group>"; };
+		3E8B3F7EFA2716A35F115BC6 /* RecordingView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RecordingView.swift; sourceTree = "<group>"; };
+		3F95DFCAD83723738A3BA79B /* RambleWidget.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = RambleWidget.entitlements; sourceTree = "<group>"; };
+		4DE787E878E130E520019A32 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		536158FA7A347A47BA33A1D5 /* HomeView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		6523070260D1C480DAFA8059 /* Keychain.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Keychain.swift; sourceTree = "<group>"; };
+		693E1A02DF24C6F64F015C8F /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		83E817E99CFC804CE5A08EC6 /* SettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		8CCBB3B0FEEC06FBFE986267 /* AppModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		99A57D707D88777DEBBB91A0 /* Recorder.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Recorder.swift; sourceTree = "<group>"; };
+		9AFA38D9288F66E40B4BCF35 /* WidgetSnapshot.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WidgetSnapshot.swift; sourceTree = "<group>"; };
+		9B0C51CA59E725809502FE72 /* RambleApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RambleApp.swift; sourceTree = "<group>"; };
+		A6075D72D63869EF46130607 /* Components.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
+		A7EF3E3F58ECFACE84953BCD /* StartBrainstormIntent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StartBrainstormIntent.swift; sourceTree = "<group>"; };
+		BCB9A81AE9059685C5F40847 /* Ramble.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = Ramble.entitlements; sourceTree = "<group>"; };
+		E55F575E342FF4AF166F7A6C /* Pipeline.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Pipeline.swift; sourceTree = "<group>"; };
+		E71C2997394A96FFE659DA73 /* SessionStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SessionStore.swift; sourceTree = "<group>"; };
+		EA6100A9761D8EB2DDEB1B0C /* Ramble.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Ramble.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F73262E9981E2809A5A698D8 /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		F87E7EE3F9CB68EAC8D8B511 /* Summarizer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Summarizer.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		2C4D899735E78DE44520FDE6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		712A0E0A796CA3738131D408 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		13FD9A861ED48A28EFF0D1E2 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				8CCBB3B0FEEC06FBFE986267 /* AppModel.swift */,
+				9B0C51CA59E725809502FE72 /* RambleApp.swift */,
+				A7EF3E3F58ECFACE84953BCD /* StartBrainstormIntent.swift */,
+			);
+			name = App;
+			path = App;
+			sourceTree = "<group>";
+		};
+		2A154C8774365004D1B7D4FD /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		37BBD7941144AD6E12313D11 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				3D870C995BC6AB7FE5524399 /* BrainstormSession.swift */,
+			);
+			name = Models;
+			path = Models;
+			sourceTree = "<group>";
+		};
+		42153B7EBACC99F2DD4E5B12 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				9AFA38D9288F66E40B4BCF35 /* WidgetSnapshot.swift */,
+			);
+			name = Shared;
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		4B840AD82EA131020CA6F732 = {
+			isa = PBXGroup;
+			children = (
+				5A3B3365F27CF82B2339F722 /* Products */,
+				2A154C8774365004D1B7D4FD /* Frameworks */,
+				F62879DB8FDA26AA1B4E5957 /* Ramble */,
+				42153B7EBACC99F2DD4E5B12 /* Shared */,
+				61F2C2CDAAC5F55624A2AE39 /* RambleWidget */,
+			);
+			sourceTree = "<group>";
+		};
+		5A3B3365F27CF82B2339F722 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				EA6100A9761D8EB2DDEB1B0C /* Ramble.app */,
+				26EE1775E6FB8705FC60C6F0 /* RambleWidget.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		61F2C2CDAAC5F55624A2AE39 /* RambleWidget */ = {
+			isa = PBXGroup;
+			children = (
+				4DE787E878E130E520019A32 /* Info.plist */,
+				3F95DFCAD83723738A3BA79B /* RambleWidget.entitlements */,
+				3837C7EDB7E456D8923353AF /* RambleWidget.swift */,
+			);
+			name = RambleWidget;
+			path = RambleWidget;
+			sourceTree = "<group>";
+		};
+		8F80A70982401F31791844AA /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				F73262E9981E2809A5A698D8 /* Assets.xcassets */,
+				693E1A02DF24C6F64F015C8F /* Info.plist */,
+				BCB9A81AE9059685C5F40847 /* Ramble.entitlements */,
+			);
+			name = Resources;
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		B6440A735AE381BDB0CFC18B /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				A6075D72D63869EF46130607 /* Components.swift */,
+				536158FA7A347A47BA33A1D5 /* HomeView.swift */,
+				3E8B3F7EFA2716A35F115BC6 /* RecordingView.swift */,
+				2E1E572ECB933420FDE70D51 /* SessionDetailView.swift */,
+				83E817E99CFC804CE5A08EC6 /* SettingsView.swift */,
+			);
+			name = Views;
+			path = Views;
+			sourceTree = "<group>";
+		};
+		DDBB670215620A5DCA392BD5 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				6523070260D1C480DAFA8059 /* Keychain.swift */,
+				1A76033E1DF6C3D668D59DB8 /* OnDeviceSummarizer.swift */,
+				E55F575E342FF4AF166F7A6C /* Pipeline.swift */,
+				99A57D707D88777DEBBB91A0 /* Recorder.swift */,
+				E71C2997394A96FFE659DA73 /* SessionStore.swift */,
+				F87E7EE3F9CB68EAC8D8B511 /* Summarizer.swift */,
+				3935CD7DA7B81114FA1195D2 /* Transcriber.swift */,
+			);
+			name = Services;
+			path = Services;
+			sourceTree = "<group>";
+		};
+		F62879DB8FDA26AA1B4E5957 /* Ramble */ = {
+			isa = PBXGroup;
+			children = (
+				13FD9A861ED48A28EFF0D1E2 /* App */,
+				37BBD7941144AD6E12313D11 /* Models */,
+				8F80A70982401F31791844AA /* Resources */,
+				DDBB670215620A5DCA392BD5 /* Services */,
+				B6440A735AE381BDB0CFC18B /* Views */,
+			);
+			name = Ramble;
+			path = Ramble;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1A074CF3C30EFD365E2EE847 /* Ramble */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E19A09A9641B622DC977DD33 /* Build configuration list for PBXNativeTarget "Ramble" */;
+			buildPhases = (
+				9D9314DA227674337E90F817 /* Sources */,
+				712A0E0A796CA3738131D408 /* Frameworks */,
+				EEDB9F2B7BC85239A68E6C86 /* Resources */,
+				D5248230C070D20456807BCD /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				7F886F1CCB9B2DE96A6971BD /* PBXTargetDependency */,
+			);
+			name = Ramble;
+			productName = Ramble;
+			productReference = EA6100A9761D8EB2DDEB1B0C /* Ramble.app */;
+			productType = "com.apple.product-type.application";
+		};
+		48E251E4442C8F465AAE5D8B /* RambleWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 090A6D4386B3D874316956DF /* Build configuration list for PBXNativeTarget "RambleWidget" */;
+			buildPhases = (
+				A5E6D90E5DF0BAB2C48AEEA6 /* Sources */,
+				2C4D899735E78DE44520FDE6 /* Frameworks */,
+				15B3A71D15A2888A285D5F12 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = RambleWidget;
+			productName = RambleWidget;
+			productReference = 26EE1775E6FB8705FC60C6F0 /* RambleWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		ECBA0FE60A0F61C53D060EC7 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+			};
+			buildConfigurationList = F003AC2A2097FC62ADA5BBCD /* Build configuration list for PBXProject "Ramble" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 4B840AD82EA131020CA6F732;
+			minimizedProjectReferenceProxies = 0;
+			preferredProjectObjectVersion = 100;
+			productRefGroup = 5A3B3365F27CF82B2339F722 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				1A074CF3C30EFD365E2EE847 /* Ramble */,
+				48E251E4442C8F465AAE5D8B /* RambleWidget */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		15B3A71D15A2888A285D5F12 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EEDB9F2B7BC85239A68E6C86 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				47DA4534A9AB36F250DA7579 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		9D9314DA227674337E90F817 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F06169C9A55BCDB761A1DD40 /* AppModel.swift in Sources */,
+				58EA4D70278D5BA7BB725658 /* RambleApp.swift in Sources */,
+				51E194EA927EA31B63A99C74 /* StartBrainstormIntent.swift in Sources */,
+				FF4526823402D0038A3925FB /* BrainstormSession.swift in Sources */,
+				A14962373F92B1B88A06F60F /* Keychain.swift in Sources */,
+				290FC29287623C0A5879D2B3 /* OnDeviceSummarizer.swift in Sources */,
+				84362241E202BEC042479710 /* Pipeline.swift in Sources */,
+				1D39540BC52E61A5FC368D17 /* Recorder.swift in Sources */,
+				6A11E34C294B246C13A5378C /* SessionStore.swift in Sources */,
+				DF20CCC5E1B95F0ADD22DFA8 /* Summarizer.swift in Sources */,
+				D3DB1D0169678142D0CA6AB5 /* Transcriber.swift in Sources */,
+				8107093583AF95C8C40AFE1F /* Components.swift in Sources */,
+				08C000F4504AF04D7E5174E8 /* HomeView.swift in Sources */,
+				B9A63EC1BFCF8D2D8F9102D2 /* RecordingView.swift in Sources */,
+				697EF797319F9F9982D19FA7 /* SessionDetailView.swift in Sources */,
+				19C428DA9E70D8E5DB27958D /* SettingsView.swift in Sources */,
+				47023E9B7BA4C31D4331AE69 /* WidgetSnapshot.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A5E6D90E5DF0BAB2C48AEEA6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4862DBA717C85F85A615986C /* WidgetSnapshot.swift in Sources */,
+				2CBEE8B1FA0FEC1442FBE34C /* RambleWidget.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		7F886F1CCB9B2DE96A6971BD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = RambleWidget;
+			target = 48E251E4442C8F465AAE5D8B /* RambleWidget */;
+			targetProxy = B0E7591E52F71FE2E5DB51F9 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		2AB31587FD0372CC426081D0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = RambleWidget/RambleWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = RambleWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Ramble;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.loomspar.ramble.widget;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		54610CF3E3C601CDF743AE38 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		B0599A6022C69680B06A7F39 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = RambleWidget/RambleWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = RambleWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Ramble;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.loomspar.ramble.widget;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		B8D55700A5EB476D7ACD183B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		C23AA9EBD5CA87DA39DC8032 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = Ramble/Resources/Ramble.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Ramble/Resources/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Ramble;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Ramble records your voice so it can turn your brainstorm into notes.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Ramble transcribes your recording on this iPhone to write your notes.";
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.loomspar.ramble;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		C42A1B4D222FB2FFA5A553C2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = Ramble/Resources/Ramble.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Ramble/Resources/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Ramble;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Ramble records your voice so it can turn your brainstorm into notes.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Ramble transcribes your recording on this iPhone to write your notes.";
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.loomspar.ramble;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		090A6D4386B3D874316956DF /* Build configuration list for PBXNativeTarget "RambleWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2AB31587FD0372CC426081D0 /* Release */,
+				B0599A6022C69680B06A7F39 /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E19A09A9641B622DC977DD33 /* Build configuration list for PBXNativeTarget "Ramble" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C23AA9EBD5CA87DA39DC8032 /* Release */,
+				C42A1B4D222FB2FFA5A553C2 /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F003AC2A2097FC62ADA5BBCD /* Build configuration list for PBXProject "Ramble" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B8D55700A5EB476D7ACD183B /* Debug */,
+				54610CF3E3C601CDF743AE38 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = ECBA0FE60A0F61C53D060EC7 /* Project object */;
+}
